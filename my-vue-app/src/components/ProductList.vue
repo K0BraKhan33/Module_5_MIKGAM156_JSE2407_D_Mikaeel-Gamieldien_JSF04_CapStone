@@ -1,3 +1,4 @@
+<!--ProductList.vue-->
 <template>
   <div class="bg-purple-800 min-h-screen p-4">
     <!-- Header Section -->
@@ -7,13 +8,14 @@
       </div>
       <!-- Shopping Cart and Wishlist Icons -->
       <div class="flex space-x-4">
-        <button @click="redirectToLogin" class="text-white text-[4vw] sm:text-[2vw]">
+        <button @click.prevent="goToLogin" class="bg-blue-500 text-white p-2 rounded-lg mt-4">Login</button>
+        <button @click="redirectToCart" class="text-white text-[4vw] sm:text-[2vw]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M6 6h15l1 10H8L6 6zM4 4h2l3.6 9.6L10.2 16H20v2H8.4l-1.6-2H3V4h1z"/>
           </svg>
           <span class="sr-only">Shopping Cart</span>
         </button>
-        <button @click="redirectToLogin" class="text-white text-[4vw] sm:text-[2vw]">
+        <button @click="redirectToWishlist" class="text-white text-[4vw] sm:text-[2vw]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 3l1.5 3h3.5l-2.7 2.5L15 12l-3-2-3 2 1-3-2.7-2.5h3.5L12 3zm0 12c2.1 0 4-1.7 4-4s-1.9-4-4-4-4 1.7-4 4 1.9 4 4 4zm0 2c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/>
           </svg>
@@ -40,7 +42,7 @@
       </div>
       <ul v-else class="flex flex-wrap -mx-4">
         <li v-for="item in filteredItems" :key="item.id" class="flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 min-h-[60vw] sm:min-h-[25vw] md:min-h-[20vw] lg:min-h-[15vw] cursor-pointer">
-          <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}`" class="block h-full">
+          <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`" class="block h-full">
             <div class="border-2 border-purple-800 bg-purple-300 p-4 rounded-lg h-full flex flex-col">
               <img :src="item.image" :alt="item.title" class="w-full max-h-[35vw] sm:max-h-[20vw] md:max-h-[30vw] lg:max-h-[25vw] object-contain mb-4">
               <div class="flex flex-col flex-grow">
@@ -49,7 +51,7 @@
                 </div>
                 <div class="flex flex-col mb-4">
                   <p class="text-gray-700 text-[4vw] sm:text-[3vw] md:text-[2.5vw] lg:text-[2vw]">{{ '$' + item.price }}</p>
-                  <p class="text-[4vw] lg:text-[1.5vw] md:text-[2vw] sm:text-[3vw] text-black mb-0">Category: {{ item.category }}</p>
+                  <p class="text-[4vw] lg:text-[1.5vw] md:text-[2vw] sm:text-[3vw] text-gray-800 mb-0">Category: {{ item.category }}</p>
                   <div class="flex items-center">
                     <span class="text-[4vw] lg:text-[1.5vw] md:text-[2vw] sm:text-[3vw] text-gray-800 mr-2">Rating:</span>
                     <div class="flex items-center">
@@ -64,74 +66,73 @@
                       </svg>
                     </div>
                   </div>
-                  <span class="text-[4vw] lg:text-[1.5vw] md:text-[2vw] sm:text-[3vw] text-gray-800">{{ item.rating ? `(${item.rating.count} reviews)` : 'No reviews' }}</span>
                 </div>
               </div>
             </div>
           </a>
+          <button @click="addToCart(item)" class="mt-auto bg-purple-600 text-white py-2 px-4 rounded">Add to Cart</button>
         </li>
       </ul>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted } from 'vue';
 import useProductList from './ProductList.js';
+import { useRoute, useRouter } from 'vue-router';
 import SortControls from './SortControls.vue';
-import { useRouter } from 'vue-router';
 
-export default {
-  name: 'ProductList',
-  components: {
-    SortControls
-  },
-  setup() {
-    const {
-      items,
-      filteredItems,
-      isLoading,
-      sortPrice,
-      sortType,
-      categories,
-      handleSortChange,
-      resetFilters,
-      isDefaultSort
-    } = useProductList();
+const { filteredItems, isLoading, sortPrice, sortType, categories, handleSortChange, isDefaultSort } = useProductList();
+const route = useRoute();
+const router = useRouter();
+const userId = ref('');
 
-    const router = useRouter();
+// Retrieve user ID from the URL or local storage
+onMounted(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const userIdFromUrl = urlParams.get('userId') || localStorage.getItem('userId');
+  userId.value = extractNumericId(userIdFromUrl);
+});
+const goToLogin = () => {
+            window.location.href = `/#/login?sortPrice=${sortPrice.value}&sortType=${sortType.value}`; // Use window.location.href to redirect
+        };
 
-    function redirectToLogin() {
-      router.push('/login');
-    }
+function extractNumericId(id) {
+  return id ? id.match(/\d+/)?.[0] || '' : '';
+}
 
-    function updateSortPrice(newSortPrice) {
-      sortPrice.value = newSortPrice;
-      handleSortChange();
-    }
-
-    function updateSortType(newSortType) {
-      sortType.value = newSortType;
-      handleSortChange();
-    }
-
-    return {
-      items,
-      filteredItems,
-      isLoading,
-      sortPrice,
-      sortType,
-      categories,
-      handleSortChange,
-      resetFilters,
-      isDefaultSort,
-      updateSortPrice,
-      updateSortType,
-      redirectToLogin
-    };
+function redirectToCart() {
+  const id = userId.value;
+  if (id) {
+    router.push(`/cart?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
+  } else {
+    router.push('/login?redirect=cart');
   }
-};
+}
+
+function redirectToWishlist() {
+  const id = userId.value;
+  if (id) {
+    router.push(`/wishlist?userId=${id}`);
+  } else {
+    router.push('/login?redirect=wishlist');
+  }
+}
+
+function addToCart(item) {
+  // Implement your add to cart functionality here
+  console.log('Adding to cart:', item);
+}
+
+function updateSortPrice(newSortPrice) {
+  sortPrice.value = newSortPrice;
+  handleSortChange();
+}
+
+function updateSortType(newSortType) {
+  sortType.value = newSortType;
+  handleSortChange();
+}
 </script>
 
-<style scoped>
-/* Add any custom styles here */
-</style>

@@ -10,6 +10,7 @@ export function useProductDetail() {
   const loading = ref(true);
   const sortPrice = ref('');
   const sortType = ref('');
+  const userId = ref('');
 
   /**
    * Initializes the component by retrieving query parameters from the URL and fetching product data.
@@ -23,7 +24,7 @@ export function useProductDetail() {
     sortPrice.value = urlParams.get('sortPrice') || ''; // Get sorting criteria for price
     sortType.value = urlParams.get('sortType') || ''; // Get sorting criteria for type
 
-    console.log('URL parameters:', { id, sortPrice: sortPrice.value, sortType: sortType.value });
+    console.log('URL parameters:', { id, sortPrice: sortPrice.value, sortType: sortType.value, userid:userId.value });
 
     fetchProductData(id);
   };
@@ -80,7 +81,7 @@ export function useProductDetail() {
     if (backLink) {
       // Update the back link with sorting and filtering parameters
       const url = new URL(window.location.href);
-      url.hash = `?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+      url.hash = `/products?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
       backLink.href = url.toString();
     }
   };

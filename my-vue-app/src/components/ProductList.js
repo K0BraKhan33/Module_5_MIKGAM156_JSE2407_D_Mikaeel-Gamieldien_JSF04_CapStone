@@ -1,17 +1,25 @@
-import { ref, onMounted, computed } from 'vue';
+//ProductList.js
+import { ref, onMounted } from 'vue';
 
 export default function useProductList() {
-  const items = ref([]);
+  const filteredItems = ref([]);
   const isLoading = ref(true);
   const sortPrice = ref('');
   const sortType = ref('');
   const categories = ref([]);
-  
+  const isDefaultSort = ref(true);
+  const userId = ref(null); // Add userId ref
+
   async function fetchProducts() {
+    if (!userId.value) {
+      console.error('User ID is not set');
+      return;
+    }
+
     try {
-      const response = await fetch('https://fakestoreapi.com/products');
+      const response = await fetch('https://fakestoreapi.com/products'); // Modify if needed to include userId
       const data = await response.json();
-      items.value = data;
+      filteredItems.value = data;
       categories.value = [...new Set(data.map(item => item.category))];
       isLoading.value = false;
     } catch (error) {
@@ -19,52 +27,28 @@ export default function useProductList() {
     }
   }
 
+  function handleSortChange() {
+    if (sortPrice.value) {
+      filteredItems.value.sort((a, b) => sortPrice.value === 'asc' ? a.price - b.price : b.price - a.price);
+    }
+    if (sortType.value) {
+      filteredItems.value.sort((a, b) => sortType.value === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title));
+    }
+  }
+
   onMounted(() => {
+    // Assuming you set the userId from somewhere (e.g., after login)
+    userId.value = 'someUserId'; // Replace with actual user ID retrieval logic
     fetchProducts();
   });
 
-  const filteredItems = computed(() => {
-    let sortedItems = [...items.value];
-
-    if (sortPrice.value) {
-      if (sortPrice.value === 'priceAsc') {
-        sortedItems.sort((a, b) => a.price - b.price);
-      } else if (sortPrice.value === 'priceDesc') {
-        sortedItems.sort((a, b) => b.price - a.price);
-      } else if (sortPrice.value === 'titleAsc') {
-        sortedItems.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (sortPrice.value === 'titleDesc') {
-        sortedItems.sort((a, b) => b.title.localeCompare(a.title));
-      }
-    }
-
-    if (sortType.value) {
-      sortedItems = sortedItems.filter(item => item.category === sortType.value);
-    }
-
-    return sortedItems;
-  });
-
-  const isDefaultSort = computed(() => !sortPrice.value && !sortType.value);
-
-  function handleSortChange() {
-    filteredItems.value = filteredItems.value;
-  }
-
-  function resetFilters() {
-    sortPrice.value = '';
-    sortType.value = '';
-  }
-
   return {
-    items,
     filteredItems,
     isLoading,
     sortPrice,
     sortType,
     categories,
     handleSortChange,
-    resetFilters,
     isDefaultSort
   };
 }
