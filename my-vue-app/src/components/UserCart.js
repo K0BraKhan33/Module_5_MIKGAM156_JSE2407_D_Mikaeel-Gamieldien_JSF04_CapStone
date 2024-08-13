@@ -1,4 +1,5 @@
-import { ref } from 'vue';
+//UserCart.js
+import { onMounted, ref } from 'vue';
 
 /**
  * Custom hook to manage the user's shopping cart.
@@ -10,9 +11,33 @@ export default function useUserCart() {
   const cartItems = ref([]);
   const productIds = ref([]);
   const currentId = ref('');
+  const hash = ref('');
+  const path = ref('');
+  const preRoute= ref('');
 
   // Retrieve and parse the user ID from localStorage
-  const localIdString = localStorage.getItem('userId');
+const localIdString = localStorage.getItem('userId');
+
+
+
+onMounted(() => {
+  const prePath = localStorage.getItem('prePath');
+  
+  hash.value = window.location.hash; // Extracts the hash part directly (e.g., "#/products?sortPrice=&sortType=")
+  path.value = hash.value.split('?')[0]; // Splits the hash to remove query parameters, leaving "#/products"
+  preRoute.value = path.value.split('/')[1]; // Splits the path to get the 'products' part
+  
+  // Store the 'products' part in localStorage
+  localStorage.setItem('prePath', preRoute.value);
+  
+  console.log(localStorage.getItem('prePath'));
+  
+  // Check if prePath is empty, 'cart', or 'undefined' (null)
+  if (prePath === ''|| !prePath || prePath === null) {
+    localStorage.setItem('prePath', 'products');
+  }
+});
+  
 
   /**
    * Fetches the user's cart items from the API.

@@ -1,3 +1,4 @@
+<!--ProductDetail.vue-->
 <template>
   <div class="bg-purple min-h-screen min-w-screen">
     <!-- Header Section -->

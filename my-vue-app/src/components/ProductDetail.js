@@ -1,3 +1,4 @@
+//ProductDetail.js
 import { ref, onMounted } from 'vue';
 
 /**
@@ -77,11 +78,12 @@ export function useProductDetail() {
    * Updates the back link with the current sorting and filtering parameters.
    */
   const updateBackLink = () => {
+    
     const backLink = document.getElementById('backLink');
     if (backLink) {
       // Update the back link with sorting and filtering parameters
       const url = new URL(window.location.href);
-      url.hash = `/products?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+      url.hash = `/${localStorage.getItem('prePath')}?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
       backLink.href = url.toString();
     }
   };

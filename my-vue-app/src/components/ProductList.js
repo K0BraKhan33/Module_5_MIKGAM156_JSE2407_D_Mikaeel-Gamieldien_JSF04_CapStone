@@ -1,4 +1,3 @@
-//ProductList.js
 import { ref, onMounted } from 'vue';
 
 export default function useProductList() {
@@ -22,18 +21,28 @@ export default function useProductList() {
       filteredItems.value = data;
       categories.value = [...new Set(data.map(item => item.category))];
       isLoading.value = false;
+      handleSortChange(); // Apply sorting after fetching
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   }
 
   function handleSortChange() {
-    if (sortPrice.value) {
-      filteredItems.value.sort((a, b) => sortPrice.value === 'asc' ? a.price - b.price : b.price - a.price);
+    let items = [...filteredItems.value]; // Create a copy to sort
+    if (sortPrice.value === 'priceAsc') {
+      items.sort((a, b) => a.price - b.price);
+    } else if (sortPrice.value === 'priceDesc') {
+      items.sort((a, b) => b.price - a.price);
     }
-    if (sortType.value) {
-      filteredItems.value.sort((a, b) => sortType.value === 'asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title));
+
+    if (sortType.value === 'titleAsc') {
+      items.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortType.value === 'titleDesc') {
+      items.sort((a, b) => b.title.localeCompare(a.title));
     }
+
+    filteredItems.value = items;
+    isDefaultSort.value = !sortPrice.value && !sortType.value; // Check if sorting is default
   }
 
   onMounted(() => {

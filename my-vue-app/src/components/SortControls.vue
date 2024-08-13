@@ -1,22 +1,21 @@
 <template>
   <div class="bg-purple-300 flex p-max space-x-4">
     <div>
-      <label for="sortPrice" class="block text-sm font-medium text-gray-700">Sort by Title or Price</label>
+      <label for="sortPrice" class="block text-sm font-medium text-gray-700">Sort by Price</label>
       <select id="sortPrice" v-model="localSortPrice" @change="emitSortChange"
         class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
         <option value="">Select</option>
         <option value="priceAsc">Price: Low to High</option>
         <option value="priceDesc">Price: High to Low</option>
-        <option value="titleAsc">Title: A to Z</option>
-        <option value="titleDesc">Title: Z to A</option>
       </select>
     </div>
     <div>
-      <label for="sortType" class="block text-sm font-medium text-gray-700">Sort by Type</label>
+      <label for="sortType" class="block text-sm font-medium text-gray-700">Sort by Title</label>
       <select id="sortType" v-model="localSortType" @change="emitSortChange"
         class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
         <option value="">Select</option>
-        <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
+        <option value="titleAsc">Title: A to Z (Price: Low to High)</option>
+        <option value="titleDesc">Title: Z to A (Price: High to Low)</option>
       </select>
     </div>
     <button v-if="!isDefaultSort" @click="resetFilters" class="mt-6 py-2 px-4 bg-red-500 text-white rounded-md">Reset Filters</button>

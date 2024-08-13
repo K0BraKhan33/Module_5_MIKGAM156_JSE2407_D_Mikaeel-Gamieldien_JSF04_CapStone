@@ -5,13 +5,41 @@
       <form @submit.prevent="handleLogin">
         <div class="mb-4">
           <label for="username" class="block text-gray-700">Username</label>
-          <input id="username" v-model="username" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+          <input
+            id="username"
+            v-model="username"
+            type="text"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            required
+          />
         </div>
         <div class="mb-4">
           <label for="password" class="block text-gray-700">Password</label>
-          <input id="password" v-model="password" type="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg" required />
+          <div class="relative">
+            <input
+              id="password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              required
+            />
+            <button
+              type="button"
+              @click="togglePasswordVisibility"
+              class="absolute inset-y-0 right-0 px-3 py-2 text-gray-600"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
         </div>
-        <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg">Login</button>
+        <button
+          type="submit"
+          class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg"
+          :disabled="loading"
+        >
+          {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
+        <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
       </form>
     </div>
   </div>
@@ -23,35 +51,95 @@ import { useRouter } from 'vue-router';
 
 const username = ref('');
 const password = ref('');
+const showPassword = ref(false);
+const loading = ref(false);
+const errorMessage = ref('');
 const router = useRouter();
 const sortPrice = ref('');
 const sortType = ref('');
 
+// Function to toggle password visibility
+function togglePasswordVisibility() {
+  showPassword.value = !showPassword.value;
+}
+
+// Function to handle login
 async function handleLogin() {
+  loading.value = true;
+  errorMessage.value = '';
+
   try {
-    const response = await fetch('https://fakestoreapi.com/users');
-    const users = await response.json();
+    // Perform the login using fetch
+    const loginResponse = await fetch('https://fakestoreapi.com/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value,
+      }),
+    });
 
-    const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-    // Find the user with matching username and password
-    const user = users.find(user => user.username === username.value && user.password === password.value);
-    sortPrice.value = urlParams.get('sortPrice') || ''; // Get sorting criteria for price
-    sortType.value = urlParams.get('sortType') || ''; // Get sorting criteria for type
+    if (!loginResponse.ok) {
+      throw new Error('Login failed');
+    }
 
-            console.log('URL parameters:', { sortPrice: sortPrice.value, sortType: sortType.value });
+    const { token } = await loginResponse.json();
 
-    if (user) {
-      // Format user ID with first 3 letters of first name and surname
-      const userId = `${user.id}`;
+    if (token) {
+      // Fetch the user data
+      const usersResponse = await fetch('https://fakestoreapi.com/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-      // Store user ID in local storage and redirect
-      localStorage.setItem('userId', userId);
-      router.push(`/products?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
+      const users = await usersResponse.json();
+      const user = users.find(user => user.username === username.value);
+      if (user) {
+        const userId = `${user.id}`;
+
+        // Store the JWT and user ID in local storage
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('token', token);
+
+        // Function to get the previous page URL
+        function getBackUrl() {
+          const prePath = localStorage.getItem('prePath');
+          const currentPath = window.location.hash.split('?')[0];
+
+          if (prePath) {
+            return `/${prePath}`;  // Ensure prePath is returned correctly
+          } else {
+            return '/products';  // Default path
+          }
+        }
+
+        // Get sorting parameters
+        const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
+        sortPrice.value = urlParams.get('sortPrice') || '';
+        sortType.value = urlParams.get('sortType') || '';
+
+        // Redirect to products page with sorting parameters
+        router.push({
+          path: getBackUrl(),
+          query: {
+            sortPrice: sortPrice.value,
+            sortType: sortType.value
+          }
+        });
+      } else {
+        errorMessage.value = 'User not found';
+      }
     } else {
-      alert('Invalid username or password');
+      errorMessage.value = 'Invalid username or password';
     }
   } catch (error) {
-    console.error('Error fetching user data:', error);
+    errorMessage.value = 'Login failed. Please try again.';
+    console.error('Error during login:', error);
+  } finally {
+    loading.value = false;
   }
 }
 </script>

@@ -8,7 +8,13 @@
       </div>
       <!-- Shopping Cart and Wishlist Icons -->
       <div class="flex space-x-4">
-        <button @click.prevent="goToLogin" class="bg-blue-500 text-white p-2 rounded-lg mt-4">Login</button>
+        <button 
+          @click="handleAuthButtonClick" 
+          :class="{'bg-red-500': loggedIn, 'bg-blue-500': !loggedIn}"
+          class="text-white p-2 rounded-lg mt-4"
+        >
+          {{ loggedIn ? 'Sign Out' : 'Login' }}
+        </button>
         <button @click="redirectToCart" class="text-white text-[4vw] sm:text-[2vw]">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
             <path d="M6 6h15l1 10H8L6 6zM4 4h2l3.6 9.6L10.2 16H20v2H8.4l-1.6-2H3V4h1z"/>
@@ -21,6 +27,7 @@
           </svg>
           <span class="sr-only">Wishlist</span>
         </button>
+        <button @click="goToComparison">Compare Products</button>
       </div>
     </header>
 
@@ -70,7 +77,10 @@
               </div>
             </div>
           </a>
-          <button @click="addToCart(item)" class="mt-auto bg-purple-600 text-white py-2 px-4 rounded">Add to Cart</button>
+          <button @click="toggleComparison(item)" class="mt-auto bg-purple-600 text-white py-2 px-4 rounded">
+            {{ isInComparison(item.id) ? 'Remove from Comparison' : 'Add to Comparison' }}
+          </button>
+          <button @click="addToCart(item)" class="mt-2 bg-purple-600 text-white py-2 px-4 rounded">Add to Cart</button>
         </li>
       </ul>
     </div>
@@ -80,59 +90,148 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import useProductList from './ProductList.js';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import SortControls from './SortControls.vue';
 
 const { filteredItems, isLoading, sortPrice, sortType, categories, handleSortChange, isDefaultSort } = useProductList();
-const route = useRoute();
 const router = useRouter();
 const userId = ref('');
+const loggedIn = ref(false);
+const comparisonList = ref([]);
 
-// Retrieve user ID from the URL or local storage
+/**
+ * Initializes component by retrieving user data and setting up local storage values.
+ */
 onMounted(() => {
+  const prePath = localStorage.getItem('prePath');
   const urlParams = new URLSearchParams(window.location.search);
-  const userIdFromUrl = urlParams.get('userId') || localStorage.getItem('userId');
-  userId.value = extractNumericId(userIdFromUrl);
-});
-const goToLogin = () => {
-            window.location.href = `/#/login?sortPrice=${sortPrice.value}&sortType=${sortType.value}`; // Use window.location.href to redirect
-        };
+  const userIdFromStorage = localStorage.getItem('userId');
+  const userIdFromUrl = urlParams.get('userId') || userIdFromStorage;
 
+  userId.value = extractNumericId(userIdFromUrl);
+  loggedIn.value = localStorage.getItem('loggedIn') === 'true';
+  comparisonList.value = JSON.parse(localStorage.getItem('comparisonList') || '[]');
+  localStorage.setItem('prePath', window.location.hash.split('?')[0].split('/')[1]);
+});
+
+/**
+ * Redirects to the comparison page or login page based on user authentication.
+ */
+function goToComparison() {
+  if (userId.value) {
+    router.push('/compare');
+  } else {
+    router.push('/login');
+  }
+}
+
+/**
+ * Handles login and logout actions based on the user's current state.
+ */
+function handleAuthButtonClick() {
+  if (loggedIn.value) {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('token');
+    localStorage.removeItem('comparisonList');
+    localStorage.removeItem('prePath');
+    localStorage.setItem('loggedIn', 'false');
+    loggedIn.value = false;
+  } else {
+    localStorage.setItem('loggedIn', 'true');
+    router.push('/login?redirect=wishlist');
+  }
+}
+
+/**
+ * Extracts a numeric ID from a string.
+ * @param {string} id - The ID to extract.
+ * @returns {string} - The extracted numeric ID.
+ */
 function extractNumericId(id) {
   return id ? id.match(/\d+/)?.[0] || '' : '';
 }
 
+/**
+ * Redirects to the cart page if the user is logged in.
+ */
 function redirectToCart() {
-  const id = userId.value;
-  if (id) {
+  if (loggedIn.value) {
     router.push(`/cart?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
   } else {
-    router.push('/login?redirect=cart');
+    alert('You are not logged in');
   }
 }
 
+/**
+ * Redirects to the wishlist page or login page based on user authentication.
+ */
 function redirectToWishlist() {
-  const id = userId.value;
-  if (id) {
-    router.push(`/wishlist?userId=${id}`);
+  if (userId.value) {
+    router.push(`/wishlist?userId=${userId.value}`);
   } else {
     router.push('/login?redirect=wishlist');
   }
 }
 
+/**
+ * Adds an item to the cart.
+ * @param {Object} item - The item to add to the cart.
+ */
 function addToCart(item) {
-  // Implement your add to cart functionality here
   console.log('Adding to cart:', item);
 }
 
+/**
+ * Updates the sorting criteria for price.
+ * @param {string} newSortPrice - The new sorting criteria for price.
+ */
 function updateSortPrice(newSortPrice) {
   sortPrice.value = newSortPrice;
   handleSortChange();
 }
 
+/**
+ * Updates the sorting criteria for type.
+ * @param {string} newSortType - The new sorting criteria for type.
+ */
 function updateSortType(newSortType) {
   sortType.value = newSortType;
   handleSortChange();
 }
+
+/**
+ * Toggles the inclusion of an item in the comparison list.
+ * @param {Object} item - The item to toggle in the comparison list.
+ */
+function toggleComparison(item) {
+  let comparisonListArray = JSON.parse(localStorage.getItem('comparisonList') || '[]');
+  const itemIndex = comparisonListArray.findIndex(i => i.id === item.id);
+
+  if (itemIndex >= 0) {
+    comparisonListArray.splice(itemIndex, 1);
+  } else {
+    if (comparisonListArray.length < 5) { // Limit to 5 products
+      comparisonListArray.push(item);
+    } else {
+      alert('You can compare up to 5 products only.'); // Limit to 5 products
+      return;
+    }
+  }
+
+  localStorage.setItem('comparisonList', JSON.stringify(comparisonListArray));
+  comparisonList.value = comparisonListArray; // Update the reactive state
+}
+
+/**
+ * Checks if an item is in the comparison list.
+ * @param {string} itemId - The ID of the item to check.
+ * @returns {boolean} - True if the item is in the comparison list, false otherwise.
+ */
+function isInComparison(itemId) {
+  return comparisonList.value.some(item => item.id === itemId);
+}
 </script>
 
+<style scoped>
+/* Add styles if needed */
+</style>
