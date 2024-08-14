@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { useProductDetail } from './ProductDetail.js';
+import { useProductDetail } from './js/ProductDetail.js';
 
 export default {
   setup() {

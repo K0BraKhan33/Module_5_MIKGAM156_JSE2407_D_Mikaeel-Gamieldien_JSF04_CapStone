@@ -16,7 +16,7 @@
     </header>
     <h2>Your Cart</h2>
     <ul class="flex flex-wrap">
-      <li v-for="item in cartItem" :key="item.id"
+      <li v-for="item in cartItems" :key="item.id"
           class="flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 min-h-[60vw] sm:min-h-[25vw] md:min-h-[20vw] lg:min-h-[15vw] cursor-pointer">
         <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}`"
             class="block h-full">
@@ -28,7 +28,7 @@
                 <h2 class="font-bold text-[4vw] sm:text-[3vw] md:text-[2.5vw] lg:text-[1.5vw]">{{ item.title }}</h2>
               </div>
               <div class="flex flex-col mb-4">
-                <p class="text-gray-700 text-[4vw] sm:text-[3vw] md:text-[2.5vw] lg:text-[2vw]">{{ '$' + item.price }}</p>
+                <p class="text-gray-700 text-[4vw] sm:text-[3vw] md:text-[2.5vw] lg:text-[2vw]">{{ '$' + item.price.toFixed(2) }}</p>
                 <p class="text-[4vw] lg:text-[1.5vw] md:text-[2vw] sm:text-[3vw] text-gray-800 mb-0">
                   Quantity: {{ getItemQuantity(item.id) }}</p>
                 <div class="flex items-center">
@@ -60,46 +60,48 @@
       </li>
     </ul>
     <button @click.prevent="clearCart" class="bg-gray-500 text-white p-2 rounded-lg mt-4">Clear Cart</button>
+    <div class="mt-4">
+      <p class="text-lg font-bold">Total Cost: ${{ totalCost }}</p>
+      <p class="text-lg font-bold">Total Items: {{ itemCount }}</p>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import useUserCart from './UserCart.js';
+import useUserCart from './js/UserCart.js';
 
-// Define reactive state and methods
-const { cart, productIds, removeFromCart, clearCart, loadCart } = useUserCart();
+const { cartItems, isLoading, fetchCartItems, removeFromCart, clearCart } = useUserCart();
 const sortPrice = ref('');
 const sortType = ref('');
-const currentPath = window.location.hash.split('?')[0]; // Get current URL path
+const currentPath = window.location.hash.split('?')[0];
 
-// Function to get the back URL
 const getBackUrl = () => {
   const prePath = localStorage.getItem('prePath');
-  
-  // If prePath is empty, 'cart', or matches the current URL, set it to '/products'
   if (!prePath || prePath === 'cart' || prePath === currentPath) {
     return '/#/products';
   }
-  
   return `/#/${prePath}`;
 };
 
 const backUrl = getBackUrl();
 
-// Load cart items on component mount
 onMounted(() => {
-  loadCart();
+  const userId = localStorage.getItem("userId");
+  fetchCartItems(userId);
   const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
   sortPrice.value = urlParams.get('sortPrice') || '';
   sortType.value = urlParams.get('sortType') || '';
-  
-  console.log('URL parameters:', { sortPrice: sortPrice.value, sortType: sortType.value });
 });
 
-// Get quantity of items by productId
 const getItemQuantity = (productId) => {
-  const item = cart.value.find(item => item.productId === productId);
+  const item = cartItems.value.find(item => item.id === productId);
   return item ? item.quantity : 0;
 };
+
+const totalCost = computed(() => {
+  return cartItems.value.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2);
+});
+
+const itemCount = computed(() => cartItems.value.length);
 </script>

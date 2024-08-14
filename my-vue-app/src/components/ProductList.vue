@@ -1,6 +1,6 @@
-<!--ProductList.vue-->
 <template>
   <div class="bg-purple-800 min-h-screen p-4">
+
     <!-- Header Section -->
     <header class="bg-purple-800 p-4 flex justify-between items-center">
       <div class="flex items-center">
@@ -96,9 +96,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import useProductList from './ProductList.js';
-import { useRouter } from 'vue-router';
+import useProductList from './js/ProductList.js';
 import SortControls from './SortControls.vue';
+
+// Import the router from vue-router (Vue specific)
+import { useRouter } from 'vue-router';
+
+// Destructure and use methods and state from `useProductList`
 const {
   filteredItems,
   isLoading,
@@ -118,7 +122,11 @@ const {
   isInComparison,
   updateSortPrice,
   updateSortType,
-  loggedIn,
-  comparisonList
+  loggedIn
 } = useProductList();
+
+// Call to fetch products when component is mounted
+onMounted(() => {
+  fetchProducts();
+});
 </script>

@@ -12,10 +12,17 @@ export default function useProductList() {
   const loggedIn = ref(false);
   const comparisonList = ref([]);
   const router = useRouter();
+const totalProducts= ref=('0')
+  // Function to show user notifications
+  function showNotification(message) {
+    // Implement your notification logic here, e.g., using a library or custom modal
+    alert(message); // Simple example
+  }
 
   async function fetchProducts() {
     if (!userId.value) {
       console.error('User ID is not set');
+      showNotification('Please log in to fetch products.');
       return;
     }
 
@@ -24,18 +31,23 @@ export default function useProductList() {
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       filteredItems.value = data;
+      for (const curritems=0; curritems in filteredItems.value; curritems++){
+        totalProducts += 1
+      };
+
+
       categories.value = [...new Set(data.map(item => item.category))];
       isLoading.value = false;
       handleSortChange();
     } catch (error) {
       console.error('Error fetching products:', error);
-      // Handle error state here
+      showNotification('Error fetching products. Please try again later.');
     }
   }
 
   function addToCart(item) {
     if (!userId.value) {
-      alert('Please log in to add items to the cart.');
+      showNotification('Please log in to add items to the cart.');
       return;
     }
 
@@ -46,21 +58,6 @@ export default function useProductList() {
   }
 
   function handleSortChange() {
-    let items = [...filteredItems.value];
-    if (sortPrice.value === 'priceAsc') {
-      items.sort((a, b) => a.price - b.price);
-    } else if (sortPrice.value === 'priceDesc') {
-      items.sort((a, b) => b.price - a.price);
-    }
-
-    if (sortType.value === 'titleAsc') {
-      items.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortType.value === 'titleDesc') {
-      items.sort((a, b) => b.title.localeCompare(a.title));
-    }
-
-    filteredItems.value = items;
-    isDefaultSort.value = !sortPrice.value && !sortType.value;
   }
 
   function goToComparison() {
@@ -89,7 +86,7 @@ export default function useProductList() {
     if (loggedIn.value) {
       router.push(`/cart?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
     } else {
-      alert('You are not logged in');
+      showNotification('You are not logged in.');
     }
   }
 
@@ -107,7 +104,7 @@ export default function useProductList() {
       if (comparisonListArray.length < 5) {
         comparisonListArray.push(item);
       } else {
-        alert('You can compare up to 5 products only.');
+        showNotification('You can compare up to 5 products only.');
         return;
       }
     }
@@ -164,6 +161,7 @@ export default function useProductList() {
     updateSortPrice,
     updateSortType,
     loggedIn,
-    comparisonList
+    comparisonList,
+    totalProducts
   };
 }
