@@ -1,6 +1,6 @@
 <template>
   <div class="bg-purple-800 min-h-screen p-4">
-
+<Discount/>
     <!-- Header Section -->
     <header class="bg-purple-800 p-4 flex justify-between items-center">
       <div class="flex items-center">
@@ -98,6 +98,7 @@
 import { ref, onMounted } from 'vue';
 import useProductList from './js/ProductList.js';
 import SortControls from './SortControls.vue';
+import Discount from './ProductDiscount.vue'
 
 // Import the router from vue-router (Vue specific)
 import { useRouter } from 'vue-router';

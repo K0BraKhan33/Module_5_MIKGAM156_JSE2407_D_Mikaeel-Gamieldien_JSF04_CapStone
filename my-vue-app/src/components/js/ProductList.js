@@ -1,6 +1,8 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
+export const totalProducts = ref(0); // Initialize totalProducts as a ref
+
 export default function useProductList() {
   const filteredItems = ref([]);
   const isLoading = ref(true);
@@ -12,10 +14,9 @@ export default function useProductList() {
   const loggedIn = ref(false);
   const comparisonList = ref([]);
   const router = useRouter();
-const totalProducts= ref=('0')
+
   // Function to show user notifications
   function showNotification(message) {
-    // Implement your notification logic here, e.g., using a library or custom modal
     alert(message); // Simple example
   }
 
@@ -31,10 +32,9 @@ const totalProducts= ref=('0')
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       filteredItems.value = data;
-      for (const curritems=0; curritems in filteredItems.value; curritems++){
-        totalProducts += 1
-      };
-
+      
+      // Update totalProducts based on the number of products fetched
+      totalProducts.value = filteredItems.value.length;
 
       categories.value = [...new Set(data.map(item => item.category))];
       isLoading.value = false;
@@ -58,6 +58,7 @@ const totalProducts= ref=('0')
   }
 
   function handleSortChange() {
+    // Your sorting logic here
   }
 
   function goToComparison() {
