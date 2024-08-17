@@ -1,3 +1,4 @@
+<!--SortControls.vue-->
 <template>
   <div class="bg-purple-300 flex p-max space-x-4">
     <div>

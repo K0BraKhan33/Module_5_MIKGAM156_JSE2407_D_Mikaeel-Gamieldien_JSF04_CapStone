@@ -1,4 +1,3 @@
-<!--ProductDetail.vue-->
 <template>
   <div class="bg-purple min-h-screen min-w-screen">
     <!-- Header Section -->
@@ -30,9 +29,23 @@
         <img :src="product.image || '/path/to/placeholder-image.png'" alt="Product Image" class="w-full max-h-[50vw] sm:max-h-[35vw] md:max-h-[35vw] lg:max-h-[30vw] object-contain mb-0">
 
         <!-- Product Price -->
-        <p class="text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold border-gray-300 mb-0">
-          Price: ${{ product.price || 'N/A' }}
-        </p>
+        <div>
+          <p v-if="product.discountedPrice" class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold border-gray-300 mb-0">
+            Price: ${{ product.discountedPrice }}
+          </p>
+          <p v-else class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold border-gray-300 mb-0">
+            Price: ${{ product.price || 'N/A' }}
+          </p>
+          <p v-if="product.discountedPrice" class="text-gray-500 line-through text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
+            Original: ${{ product.price || 'N/A' }}
+          </p>
+          <p v-if="product.discountPercentage" class="text-green-500 text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
+            Discount: {{ product.discountPercentage }}%
+          </p>
+          <p v-else class="text-green-500 text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
+            No discount available
+          </p>
+        </div>
 
         <!-- Product Description -->
         <div class="scroll-box sm:max-h-[60vw] md:max-h-[70vw] lg:max-h-[80vw] border border-purple-dark rounded mb-0">
@@ -80,18 +93,21 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
 import { useProductDetail } from './js/ProductDetail.js';
 
 export default {
   setup() {
-    const { product, isFavorited, loading, sortPrice, sortType } = useProductDetail();
+    const { product, isFavorited, loading, init } = useProductDetail();
+
+    onMounted(() => {
+      init();
+    });
 
     return {
       product,
       isFavorited,
-      loading,
-      sortPrice,
-      sortType
+      loading
     };
   }
 };

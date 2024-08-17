@@ -1,78 +1,78 @@
 <template>
-    <main class="p-4">
-      <!-- Loading Indicator -->
-      <div v-if="loading" class="flex justify-center items-center h-full">
-        <p class="border-gray-300 text-[5vw]">Loading...</p>
-      </div>
-  
-      <!-- Product Details Section -->
-      <div v-else class="border-2 border-purple bg-purple-300 shadow-md rounded-lg w-full p-4">
-        <h1 class="text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2.5vw] xl:text-[2vw] font-bold mb-0 border-gray-300">
-          {{ product.title }}
-        </h1>
-  
-        <img :src="product.image || '/path/to/placeholder-image.png'" alt="Product Image" class="w-full max-h-[50vw] sm:max-h-[35vw] md:max-h-[35vw] lg:max-h-[30vw] object-contain mb-0">
-  
-        <p class="text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold border-gray-300 mb-0">
-          Price: ${{ product.price || 'N/A' }}
-        </p>
-  
-        <div class="scroll-box sm:max-h-[60vw] md:max-h-[70vw] lg:max-h-[80vw] border border-purple-dark rounded mb-0">
-          <p class="text-[4vw] sm:text-[4vw] md:text-[2vw] lg:text-[1.5vw] border-gray-300">
-            {{ product.description || 'N/A' }}
-          </p>
-        </div>
-  
-        <p class="text-[4vw] lg:text-[1.5vw] md:text-[2vw] sm:text-[3vw] border-gray-300 mb-0">
-          Category: {{ product.category || 'N/A' }}
-        </p>
-  
-        <div class="flex items-center mb-[50vw]">
-          <div class="flex items-center">
-            <span class="text-[4vw] lg:text-[3vw] md:text-[2vw] sm:text-[1.5vw] border-gray-300 mr-2">Rating:</span>
-            <div class="flex items-center">
-              <template v-if="product.rating && product.rating.rate !== undefined">
-                <template v-for="_ in Math.floor(product.rating.rate)">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
-                  </svg>
-                </template>
-                <template v-for="_ in Math.ceil(product.rating.rate - Math.floor(product.rating.rate))">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
-                  </svg>
-                </template>
-                <template v-for="_ in 5 - Math.ceil(product.rating.rate)">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
-                  </svg>
-                </template>
-              </template>
-            </div>
+  <div class="bg-gray-100 p-4">
+    <h2 class="text-2xl font-bold mb-4">Discounted Products</h2>
+    <div v-if="discountedProducts.length > 0" class="carousel flex overflow-x-auto space-x-4">
+      <div v-for="product in discountedProducts" :key="product.id" class="carousel-item min-w-[250px] flex-shrink-0">
+        <a
+          :href="`#/about?id=${product.id}`"
+          class="block p-4 bg-white rounded-lg shadow-md hover:bg-gray-50 transition"
+          @click="handleProductClick(product)"
+        >
+          <img :src="product.image" :alt="product.title" class="w-full h-40 object-cover mb-4 rounded-md">
+          <div class="text-center">
+            <h3 class="text-lg font-semibold">{{ product.title }}</h3>
+            <p v-if="product.discountedPrice" class="text-red-500 text-xl font-bold">${{ product.discountedPrice }}</p>
+            <p v-else class="text-red-500 text-xl font-bold">${{ product.originalPrice }}</p>
+            <p v-if="product.discountPercentage" class="text-gray-500 line-through">${{ product.originalPrice }}</p>
+            <p v-else class="text-gray-500 line-through">${{ product.originalPrice }}</p>
+            <p v-if="product.discountPercentage" class="text-green-500 text-sm">Discount: {{ product.discountPercentage }}%</p>
+            <p v-else class="text-green-500 text-sm">No discount available</p>
+            <p class="text-gray-600 text-xs mt-2">Sale Ends: {{ product.saleEndDate }}</p>
           </div>
-          <span class="text-[4vw] lg:text-[3vw] md:text-[2vw] sm:text-[1.5vw] border-gray-300">
-            {{ product.rating ? `(${product.rating.count} reviews)` : 'No reviews' }}
-          </span>
-        </div>
+        </a>
       </div>
-    </main>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted } from 'vue';
-  import useDiscount from './js/ProductDiscount.js';
-  
-  const loading = ref(true);
-  const product = ref({});
-  
-  const { getProduct } = useDiscount();
-  
-  onMounted(async () => {
-    const products = await getProduct();
-    if (products.length > 0) {
-      product.value = products[0];  // Display the first product initially
-    }
-    loading.value = false;
-  });
-  </script>
-  
+    </div>
+    <p v-else class="text-gray-500">No discounted products available.</p>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { fetchDiscountedProducts, getDiscountedPriceFromLocalStorage, getDiscountPercentageFromLocalStorage } from './js/ProductDiscount.js';
+
+const discountedProducts = ref([]);
+
+// Fetch discounted products when component is mounted
+onMounted(async () => {
+  try {
+    const products = await fetchDiscountedProducts();
+    discountedProducts.value = products.map(product => {
+      const discountedPrice = getDiscountedPriceFromLocalStorage(product.id);
+      const discountPercentage = getDiscountPercentageFromLocalStorage(product.id);
+      return {
+        ...product,
+        discountedPrice: discountedPrice || product.discountedPrice,
+        discountPercentage: discountPercentage || product.discountPercentage
+      };
+    });
+  } catch (error) {
+    console.error('Failed to fetch discounted products:', error);
+  }
+});
+
+// Method to handle product clicks
+function handleProductClick(product) {
+  // Log or perform any action you need when a product is clicked
+  console.log('Product clicked:', product);
+  // You can also send data to a server or perform other actions here
+}
+</script>
+
+<style scoped>
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+.carousel::-webkit-scrollbar {
+  height: 8px;
+}
+.carousel::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+.carousel-item {
+  min-width: 250px;
+  flex-shrink: 0;
+}
+</style>

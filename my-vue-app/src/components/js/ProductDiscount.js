@@ -1,35 +1,88 @@
-import { ref } from 'vue';
-import { totalProducts } from './ProductList';
+// Function to generate a random discount percentage between 5% and 20%
+function getRandomDiscount() {
+  return Math.floor(Math.random() * 16) + 5;
+}
 
-export default function useDiscount() {
-    async function getProduct() {
-        const selectedProductIds = new Set();
+// Function to generate a random future date within 30 days
+function getRandomSaleEndDate() {
+  const currentDate = new Date();
+  const randomDays = Math.floor(Math.random() * 30) + 1;
+  currentDate.setDate(currentDate.getDate() + randomDays);
+  return currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+}
 
-        // Generate 5 unique random product IDs
-        while (selectedProductIds.size < 5) {
-            const randomProductId = Math.floor(Math.random() * totalProducts.value) + 1;
-            selectedProductIds.add(randomProductId);
-        }
 
-        // Convert the set to an array to access elements by index
-        const productIdsArray = Array.from(selectedProductIds);
+// Function to save discounted products to localStorage
+function saveDiscountedProductsToLocalStorage(discountedProducts) {
+  localStorage.setItem('discountedProducts', JSON.stringify(discountedProducts));
+}
 
-        // Loop through the product IDs and fetch their details from the API
-        for (let i = 0; i < productIdsArray.length; i++) {
-            const randomProductId = productIdsArray[i];
-            try {
-                const response = await fetch(`https://fakestoreapi.com/products/${randomProductId}`);
-                const productData = await response.json();
-                console.log(`Product ${i + 1}:`, productData);
-            } catch (error) {
-                console.error(`Failed to fetch data for product ID ${randomProductId}:`, error);
-            }
-        }
+// Function to get discounted products from localStorage
+function getDiscountedProductsFromLocalStorage() {
+  const storedDiscounts = localStorage.getItem('discountedProducts');
+  return storedDiscounts ? JSON.parse(storedDiscounts) : [];
+}
 
-        console.log("________________________________________________________________________________________________________________________________");
+// Fetch discounted products
+async function fetchDiscountedProducts() {
+  const existingDiscounts = getDiscountedProductsFromLocalStorage();
+
+  // If discounts exist in localStorage, reuse them
+  if (existingDiscounts.length > 0) {
+    return existingDiscounts;
+  }
+
+  // Otherwise, generate new discounts
+  try {
+    const response = await fetch('https://fakestoreapi.com/products');
+    const products = await response.json();
+
+    const discountedProducts = [];
+    const selectedIds = new Set();
+
+    while (discountedProducts.length < 5) {
+      const randomIndex = Math.floor(Math.random() * products.length);
+      const product = products[randomIndex];
+
+      if (!selectedIds.has(product.id)) {
+        const discountPercentage = getRandomDiscount();
+        const discountedPrice = (product.price * (1 - discountPercentage / 100)).toFixed(2);
+
+        discountedProducts.push({
+          id: product.id,
+          title: product.title,
+          originalPrice: product.price.toFixed(2),
+          discountedPrice,
+          discountPercentage,
+          image: product.image,
+          saleEndDate: getRandomSaleEndDate(),
+        });
+
+        selectedIds.add(product.id);
+      }
     }
 
-    return {
-        getProduct
-    }
+    // Save the generated discounts to localStorage
+    saveDiscountedProductsToLocalStorage(discountedProducts);
+    return discountedProducts;
+  } catch (error) {
+    console.error('Failed to fetch products:', error);
+    return [];
+  }
+}
+
+// Export the fetch function
+export { fetchDiscountedProducts };
+
+// Assuming you have this function to fetch and handle local storage
+export function getDiscountedPriceFromLocalStorage(productId) {
+  const discountedProducts = JSON.parse(localStorage.getItem('discountedProducts')) || [];
+  const product = discountedProducts.find(p => p.id === productId);
+  return product ? product.discountedPrice : null;
+}
+
+export function getDiscountPercentageFromLocalStorage(productId) {
+  const discountedProducts = JSON.parse(localStorage.getItem('discountedProducts')) || [];
+  const product = discountedProducts.find(p => p.id === productId);
+  return product ? product.discountPercentage : null;
 }

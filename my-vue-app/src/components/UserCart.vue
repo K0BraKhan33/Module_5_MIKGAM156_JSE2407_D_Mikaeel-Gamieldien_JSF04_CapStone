@@ -1,3 +1,4 @@
+<!-- UserCart.vue -->
 <template>
   <div>
     <header class="bg-purple-800 p-4 flex items-center">
@@ -14,7 +15,7 @@
         <span>GoodMarting</span>
       </a>
     </header>
-    <h2>Your Cart</h2>
+    <h2 class="text-2xl font-bold my-4">Your Cart</h2>
     <ul class="flex flex-wrap">
       <li v-for="item in cartItems" :key="item.id"
           class="flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 min-h-[60vw] sm:min-h-[25vw] md:min-h-[20vw] lg:min-h-[15vw] cursor-pointer">
@@ -68,10 +69,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import useUserCart from './js/UserCart.js';
 
-const { cartItems, isLoading, fetchCartItems, removeFromCart, clearCart } = useUserCart();
+const { cartItems, fetchCartItems, removeFromCart, clearCart } = useUserCart();
 const sortPrice = ref('');
 const sortType = ref('');
 const currentPath = window.location.hash.split('?')[0];
@@ -105,3 +106,7 @@ const totalCost = computed(() => {
 
 const itemCount = computed(() => cartItems.value.length);
 </script>
+
+<style scoped>
+/* Add any custom styles here */
+</style>

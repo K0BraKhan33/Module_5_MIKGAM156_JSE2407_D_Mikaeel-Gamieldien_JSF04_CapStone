@@ -1,6 +1,6 @@
 <template>
   <div class="bg-purple-800 min-h-screen p-4">
-<Discount/>
+
     <!-- Header Section -->
     <header class="bg-purple-800 p-4 flex justify-between items-center">
       <div class="flex items-center">
@@ -32,6 +32,13 @@
     <!-- Sorting and Filtering -->
     <SortControls :sortPrice="sortPrice" :sortType="sortType" :categories="categories" :isDefaultSort="isDefaultSort"
       @update:sortPrice="updateSortPrice" @update:sortType="updateSortType" @sort-change="handleSortChange" />
+      
+      <div>
+      <div v-if="isLoading" class="flex justify-center items-center h-full">
+        <p class="border-gray-300 text-[5vw]">Loading...</p>
+      </div>
+      <Discount/>
+      </div>
 
     <!-- Product List -->
     <div>

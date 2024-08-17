@@ -55,15 +55,11 @@ const showPassword = ref(false);
 const loading = ref(false);
 const errorMessage = ref('');
 const router = useRouter();
-const sortPrice = ref('');
-const sortType = ref('');
 
-// Function to toggle password visibility
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
 }
 
-// Function to handle login
 async function handleLogin() {
   loading.value = true;
   errorMessage.value = '';
@@ -118,15 +114,15 @@ async function handleLogin() {
 
         // Get sorting parameters
         const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
-        sortPrice.value = urlParams.get('sortPrice') || '';
-        sortType.value = urlParams.get('sortType') || '';
+        const sortPrice = urlParams.get('sortPrice') || '';
+        const sortType = urlParams.get('sortType') || '';
 
         // Redirect to products page with sorting parameters
         router.push({
           path: getBackUrl(),
           query: {
-            sortPrice: sortPrice.value,
-            sortType: sortType.value
+            sortPrice: sortPrice,
+            sortType: sortType
           }
         });
       } else {

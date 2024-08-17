@@ -1,4 +1,5 @@
-<template>
+<!--ProductCompare.vue-->
+  <template>
     <div class="bg-purple-800 min-h-screen p-4">
       <header class="bg-purple-800 p-4 flex justify-between items-center">
         <div class="flex items-center">

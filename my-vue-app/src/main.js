@@ -6,6 +6,7 @@ import ProductDetail from './components/ProductDetail.vue';
 import UserLogin from './components/UserLogin.vue';
 import UserCart from './components/UserCart.vue';
 import ProductCompare from './components/ProductCompare.vue'; // Import the new component
+// import { setDiscountedProduct } from './components/js/ProductDiscount.js';
 
 const routes = [
   { path: '/login', component: UserLogin },
@@ -24,3 +25,4 @@ const router = createRouter({
 const app = createApp(App);
 app.use(router);
 app.mount('#app');
+
