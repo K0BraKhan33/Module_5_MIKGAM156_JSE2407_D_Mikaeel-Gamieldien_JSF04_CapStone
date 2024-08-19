@@ -1,71 +1,90 @@
 // UserCart.js
-import { ref } from 'vue';
-import filteredItems from './ProductList.js';
+import { ref, computed, onMounted } from 'vue';
 
 export default function useUserCart() {
-  const cartItems = ref([]);
-  const isLoading = ref(true);
-  const pItems = ref(filteredItems);
+    const cartItems = ref([]);
+    const userId = localStorage.getItem("userId");
 
-  async function fetchCartItems(userId) {
-    // Implementation
-  }
+    const fetchProductDetails = async (productId) => {
+        try {
+            const response = await fetch(`https://fakestoreapi.com/products/${productId}`);
+            if (!response.ok) throw new Error("Failed to fetch product details");
+            return await response.json();
+        } catch (error) {
+            console.error("Error fetching product details:", error);
+            return null;
+        }
+    };
 
-  function addToCart(productId, quantity = 1) {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      console.error('User ID is not set');
-      return;
-    }
+    const fetchCartItems = async () => {
+        if (!userId) return;
 
-    const cartItemsKey = `${userId}cartItems`;
-    let cartItemsArray = JSON.parse(localStorage.getItem(cartItemsKey)) || [];
+        const cartKey = `${userId}cartItems`;
+        const storedCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+        const productQuantities = {};
 
-    // Update item quantity or add new item
-    const existingItemIndex = cartItemsArray.findIndex(item => item[0] === productId);
-    if (existingItemIndex >= 0) {
-      cartItemsArray[existingItemIndex][1] += quantity;
-    } else {
-      cartItemsArray.push([productId, quantity]);
-    }
+        // Count the quantities of each product
+        storedCart.forEach(productId => {
+            productQuantities[productId] = (productQuantities[productId] || 0) + 1;
+        });
 
-    localStorage.setItem(cartItemsKey, JSON.stringify(cartItemsArray));
-    fetchCartItems(userId);
-  }
+        const productDetailsPromises = Object.keys(productQuantities).map(id => fetchProductDetails(id));
+        const productDetailsArray = await Promise.all(productDetailsPromises);
 
-  function removeFromCart(productId) {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      console.error('User ID is not set');
-      return;
-    }
+        cartItems.value = productDetailsArray.map((details, index) => ({
+            ...details,
+            quantity: productQuantities[details.id]
+        })).filter(item => item !== null);
+    };
 
-    const cartItemsKey = `${userId}cartItems`;
-    let cartItemsArray = JSON.parse(localStorage.getItem(cartItemsKey)) || [];
+    const updateCartItem = (productId, quantity) => {
+        const cartKey = `${userId}cartItems`;
+        let storedCart = JSON.parse(localStorage.getItem(cartKey)) || [];
 
-    // Remove productId from cart items array
-    cartItemsArray = cartItemsArray.filter(item => item[0] !== productId);
-    localStorage.setItem(cartItemsKey, JSON.stringify(cartItemsArray));
+        // Remove all instances of productId
+        storedCart = storedCart.filter(id => id !== productId);
 
-    fetchCartItems(userId);
-  }
+        // Add the productId `quantity` number of times
+        for (let i = 0; i < quantity; i++) {
+            storedCart.push(productId);
+        }
 
-  function clearCart() {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      const cartItemsKey = `${userId}cartItems`;
-      localStorage.removeItem(cartItemsKey);
-      cartItems.value = [];
-    }
-  }
+        localStorage.setItem(cartKey, JSON.stringify(storedCart));
+        fetchCartItems();
+    };
 
-  return {
-    cartItems,
-    isLoading,
-    fetchCartItems,
-    addToCart,
-    removeFromCart,
-    clearCart,
-    pItems
-  };
+    const removeCartItem = (productId) => {
+        const cartKey = `${userId}cartItems`;
+        let storedCart = JSON.parse(localStorage.getItem(cartKey)) || [];
+
+        // Remove all instances of productId
+        storedCart = storedCart.filter(id => id !== productId);
+
+        localStorage.setItem(cartKey, JSON.stringify(storedCart));
+        fetchCartItems();
+    };
+
+    const clearCart = () => {
+        const cartKey = `${userId}cartItems`;
+        localStorage.removeItem(cartKey);
+        fetchCartItems();
+    };
+
+    const totalCost = computed(() => {
+        return cartItems.value.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0).toFixed(2);
+    });
+
+    const itemCount = computed(() => cartItems.value.reduce((count, item) => count + item.quantity, 0));
+
+    onMounted(fetchCartItems);
+
+    return {
+        cartItems,
+        totalCost,
+        itemCount,
+        fetchCartItems,
+        updateCartItem,
+        removeCartItem,
+        clearCart
+    };
 }

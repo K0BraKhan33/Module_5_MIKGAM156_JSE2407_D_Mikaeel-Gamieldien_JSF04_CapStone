@@ -46,17 +46,24 @@ export default function useProductList() {
     }
   }
 
-  function addToCart(item) {
-    if (!userId.value) {
-      showNotification('Please log in to add items to the cart.');
-      return;
+   function addToCart(productId) {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+        alert("You must be logged in to add items to the cart.");
+        return;
     }
+    const cartKey = `${userId}cartItems`;
+    let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
 
-    const cartItems = JSON.parse(localStorage.getItem(`${userId.value}cartItems`)) || [];
-    cartItems.push(item);
-    localStorage.setItem(`${userId.value}cartItems`, JSON.stringify(cartItems));
-    console.log('Adding to cart:', cartItems);
-  }
+    // Add product to cart
+    cart.push(productId);
+
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+
+    // Notify the cart update
+    const event = new CustomEvent("cart-updated");
+    window.dispatchEvent(event);
+}
 
   function handleSortChange() {
     // Your sorting logic here
@@ -151,6 +158,7 @@ export default function useProductList() {
     categories,
     addToCart,
     fetchProducts,
+    addToCart,
     userId,
     handleSortChange,
     isDefaultSort,
