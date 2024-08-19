@@ -1,19 +1,18 @@
-<!--ProductDiscount.vue-->
 <template>
-  <div class="bg-gray-100 p-4">
-    <h2 class="text-2xl font-bold mb-4">Discounted Products</h2>
+  <div :class="['p-4', themeClass]">
+    <h2 :class="headerTextClass">Discounted Products</h2>
     <div v-if="discountedProducts.length > 0" class="carousel flex overflow-x-auto space-x-4">
       <div v-for="product in discountedProducts" :key="product.id" class="carousel-item min-w-[250px] flex-shrink-0">
         <a
           :href="`#/about?id=${product.id}`"
-          class="block p-4 bg-white rounded-lg shadow-md hover:bg-gray-50 transition"
+          class="block p-4 rounded-lg shadow-md hover:bg-gray-50 transition"
           @click="handleProductClick(product)"
         >
           <img :src="product.image" :alt="product.title" class="w-full h-40 object-cover mb-4 rounded-md">
           <div class="text-center">
-            <h3 class="text-lg font-semibold">{{ product.title }}</h3>
-            <p v-if="product.discountedPrice" class="text-red-500 text-xl font-bold">${{ product.discountedPrice }}</p>
-            <p v-else class="text-red-500 text-xl font-bold">${{ product.originalPrice }}</p>
+            <h3 :class="titleTextClass">{{ product.title }}</h3>
+            <p v-if="product.discountedPrice" :class="priceTextClass">${{ product.discountedPrice }}</p>
+            <p v-else :class="priceTextClass">${{ product.originalPrice }}</p>
             <p v-if="product.discountPercentage" class="text-gray-500 line-through">${{ product.originalPrice }}</p>
             <p v-else class="text-gray-500 line-through">${{ product.originalPrice }}</p>
             <p v-if="product.discountPercentage" class="text-green-500 text-sm">Discount: {{ product.discountPercentage }}%</p>
@@ -28,13 +27,24 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { fetchDiscountedProducts, getDiscountedPriceFromLocalStorage, getDiscountPercentageFromLocalStorage } from './js/ProductDiscount.js';
 
 const discountedProducts = ref([]);
+const currentTheme = ref(localStorage.getItem('theme') || 'dark');
 
-// Fetch discounted products when component is mounted
 onMounted(async () => {
+  // Fetch products initially
+  await fetchProductsAndUpdate();
+  
+  // Listen for theme change events
+  window.addEventListener('theme-changed', async () => {
+    currentTheme.value = localStorage.getItem('theme') || 'dark';
+    await fetchProductsAndUpdate();
+  });
+});
+
+async function fetchProductsAndUpdate() {
   try {
     const products = await fetchDiscountedProducts();
     discountedProducts.value = products.map(product => {
@@ -49,13 +59,27 @@ onMounted(async () => {
   } catch (error) {
     console.error('Failed to fetch discounted products:', error);
   }
+}
+
+const themeClass = computed(() => {
+  return currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100';
 });
 
-// Method to handle product clicks
+const headerTextClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-gray-900' : 'text-gray-100';
+});
+
+const titleTextClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-gray-900' : 'text-gray-100';
+});
+
+const priceTextClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-red-800 text-xl font-bold' : 'text-red-600 text-xl font-bold';
+});
+
 function handleProductClick(product) {
   // Log or perform any action you need when a product is clicked
   console.log('Product clicked:', product);
-  // You can also send data to a server or perform other actions here
 }
 </script>
 

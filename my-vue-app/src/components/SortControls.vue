@@ -1,20 +1,19 @@
 <template>
-  <div class="bg-purple-300 flex p-max space-x-4">
+  <div :class="themeClass">
     <div>
       <label for="sortCriteria" class="block text-sm font-medium text-gray-700">Sort by</label>
       <select id="sortCriteria" v-model="localSortCriteria" @change="emitSortChange"
-        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+        class="mt-1 block w-[25%] pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
         <option value="">Select</option>
         <option value="priceAsc">Price: Low to High</option>
         <option value="priceDesc">Price: High to Low</option>
         <option value="titleAsc">Title: A to Z</option>
         <option value="titleDesc">Title: Z to A</option>
       </select>
-    </div>
-    <div>
+ 
       <label for="categoryFilter" class="block text-sm font-medium text-gray-700">Filter by Category</label>
       <select id="categoryFilter" v-model="localCategory" @change="emitSortChange"
-        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+        class="mt-1 block w-[25%] pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
         <option value="">All Categories</option>
         <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
       </select>
@@ -34,8 +33,8 @@ export default {
   },
   data() {
     return {
-      localSortCriteria: this.sortCriteria,
-      localCategory: this.selectedCategory
+      localSortCriteria: this.getStoredSortCriteria() || this.sortCriteria,
+      localCategory: this.getStoredCategory() || this.selectedCategory
     };
   },
   methods: {
@@ -43,11 +42,22 @@ export default {
       this.$emit('update:sortCriteria', this.localSortCriteria);
       this.$emit('update:selectedCategory', this.localCategory);
       this.$emit('sort-change');
+      this.saveToLocalStorage();
     },
     resetFilters() {
       this.localSortCriteria = '';
       this.localCategory = '';
       this.emitSortChange();
+    },
+    saveToLocalStorage() {
+      localStorage.setItem('sortCriteria', this.localSortCriteria);
+      localStorage.setItem('category', this.localCategory);
+    },
+    getStoredSortCriteria() {
+      return localStorage.getItem('sortCriteria');
+    },
+    getStoredCategory() {
+      return localStorage.getItem('category');
     }
   },
   watch: {
