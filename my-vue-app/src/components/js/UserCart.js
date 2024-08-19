@@ -1,40 +1,17 @@
-//UserCart.js
+// UserCart.js
 import { ref } from 'vue';
+import filteredItems from './ProductList.js';
 
 export default function useUserCart() {
   const cartItems = ref([]);
   const isLoading = ref(true);
+  const pItems = ref(filteredItems);
 
   async function fetchCartItems(userId) {
-    if (!userId) {
-      console.error('User ID is not provided');
-      return;
-    }
-
-    const cartItemsKey = `${userId}cartItems`;
-    const storedCartItems = localStorage.getItem(cartItemsKey);
-
-    if (storedCartItems) {
-      try {
-        const cartItemsArray = JSON.parse(storedCartItems);
-        if (Array.isArray(cartItemsArray)) {
-          cartItems.value = cartItemsArray;
-        } else {
-          console.warn('Cart items data is not an array');
-          cartItems.value = [];
-        }
-      } catch (error) {
-        console.error('Error parsing cart items:', error);
-        cartItems.value = [];
-      }
-    } else {
-      cartItems.value = [];
-    }
-
-    isLoading.value = false;
+    // Implementation
   }
 
-  function addToCart(productId) {
+  function addToCart(productId, quantity = 1) {
     const userId = localStorage.getItem('userId');
     if (!userId) {
       console.error('User ID is not set');
@@ -42,17 +19,18 @@ export default function useUserCart() {
     }
 
     const cartItemsKey = `${userId}cartItems`;
-    const cartItemsArray = cartItems.value;
-    const productIndex = cartItemsArray.findIndex(item => item.id === productId);
+    let cartItemsArray = JSON.parse(localStorage.getItem(cartItemsKey)) || [];
 
-    if (productIndex >= 0) {
-      cartItemsArray[productIndex].quantity += 1;
+    // Update item quantity or add new item
+    const existingItemIndex = cartItemsArray.findIndex(item => item[0] === productId);
+    if (existingItemIndex >= 0) {
+      cartItemsArray[existingItemIndex][1] += quantity;
     } else {
-      cartItemsArray.push({ id: productId, quantity: 1 });
+      cartItemsArray.push([productId, quantity]);
     }
 
     localStorage.setItem(cartItemsKey, JSON.stringify(cartItemsArray));
-    cartItems.value = cartItemsArray;
+    fetchCartItems(userId);
   }
 
   function removeFromCart(productId) {
@@ -63,12 +41,13 @@ export default function useUserCart() {
     }
 
     const cartItemsKey = `${userId}cartItems`;
-    const cartItemsArray = cartItems.value;
+    let cartItemsArray = JSON.parse(localStorage.getItem(cartItemsKey)) || [];
 
-    const updatedCartItems = cartItemsArray.filter(item => item.id !== productId);
+    // Remove productId from cart items array
+    cartItemsArray = cartItemsArray.filter(item => item[0] !== productId);
+    localStorage.setItem(cartItemsKey, JSON.stringify(cartItemsArray));
 
-    localStorage.setItem(cartItemsKey, JSON.stringify(updatedCartItems));
-    cartItems.value = updatedCartItems;
+    fetchCartItems(userId);
   }
 
   function clearCart() {
@@ -86,6 +65,7 @@ export default function useUserCart() {
     fetchCartItems,
     addToCart,
     removeFromCart,
-    clearCart
+    clearCart,
+    pItems
   };
 }

@@ -1,3 +1,4 @@
+//ProjectDiscount.js
 // Function to generate a random discount percentage between 5% and 20%
 function getRandomDiscount() {
   return Math.floor(Math.random() * 16) + 5;

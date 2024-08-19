@@ -1,3 +1,4 @@
+//ProjectList.js
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -41,7 +42,7 @@ export default function useProductList() {
       handleSortChange();
     } catch (error) {
       console.error('Error fetching products:', error);
-      showNotification('Error fetching products. Please try again later.');
+
     }
   }
 

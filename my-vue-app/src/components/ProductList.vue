@@ -1,3 +1,4 @@
+<!--ProductList.js-->
 <template>
   <div class="bg-purple-800 min-h-screen p-4">
 
