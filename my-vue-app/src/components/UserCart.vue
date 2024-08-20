@@ -1,41 +1,47 @@
 <template>
   <div :class="[themeClass, 'min-h-screen p-4']">
+    <!-- Header Section -->
     <header :class="[headerClass, 'p-4 flex items-center']">
       <a
         id="backLinkCart"
         :href="backUrl"
-        class="text-white text-lg font-semibold flex items-center space-x-2"
+        :class="headerLinkClass"
+        class="flex items-center space-x-2"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <span class="text-lg">GoodMarting</span>
+        <span :class="headerTextClass">GoodMarting</span>
       </a>
     </header>
 
+    <!-- Cart Title -->
     <h2 :class="titleClass">Your Cart</h2>
 
+    <!-- Cart Items List -->
     <ul class="flex flex-wrap gap-4">
       <li v-for="item in cartItems" :key="item.id"
-          :class="[itemClass, 'flex flex-col w-full md:w-1/2 lg:w-1/4 p-4']">
+          :class="[itemClass, 'flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 hover:shadow-lg transition-shadow']">
         <div class="flex flex-col h-full">
           <img :src="item.image" :alt="item.title"
-              class="w-full h-48 object-contain mb-4">
-          <h2 :class="itemTitleClass">{{ item.title }}</h2>
-          <p :class="itemPriceClass">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
-          <p :class="itemQuantityClass">Quantity: {{ item.quantity }}</p>
+              class="w-full h-48 object-contain mb-4 hover:opacity-80 transition-opacity">
+          <h2 :class="[itemTitleClass, 'hover:text-gray-500 transition-colors']">{{ item.title }}</h2>
+          <p :class="[itemPriceClass, 'hover:text-gray-700 transition-colors']">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
+          <p :class="[itemQuantityClass, 'hover:text-gray-600 transition-colors']">Quantity: {{ item.quantity }}</p>
 
           <input type="number" min="1" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)"
-              :class="inputClass" />
+              :class="[inputClass, 'focus:ring-2 focus:ring-amber-400 transition-ring']" />
 
           <button @click.prevent="removeFromCart(item.id)"
-              :class="removeButtonClass">Remove</button>
+              :class="[removeButtonClass, 'hover:bg-red-600 transition-colors']">Remove</button>
         </div>
       </li>
     </ul>
 
-    <button @click.prevent="clearCart" :class="clearButtonClass">Clear Cart</button>
+    <!-- Clear Cart Button -->
+    <button @click.prevent="clearCart" :class="[clearButtonClass, 'hover:bg-gray-600 transition-colors']">Clear Cart</button>
 
+    <!-- Cart Summary -->
     <div class="mt-4">
       <p :class="totalCostClass">Total Cost: ${{ totalCost }}</p>
       <p :class="itemCountClass">Total Items: {{ itemCount }}</p>
@@ -76,7 +82,15 @@ const themeClass = computed(() => {
 });
 
 const headerClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-gray-800' : 'bg-gray-700';
+  return currentTheme.value === 'light' ? 'bg-gray-200 text-pink-600' : 'bg-gray-700 text-amber-400';
+});
+
+const headerLinkClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
+});
+
+const headerTextClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
 });
 
 const titleClass = computed(() => {
@@ -84,7 +98,7 @@ const titleClass = computed(() => {
 });
 
 const itemClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-white border border-gray-300' : 'bg-gray-800 border border-gray-700';
+  return currentTheme.value === 'light' ? 'bg-white border border-gray-300 hover:bg-gray-50' : 'bg-gray-800 border border-gray-600 hover:bg-gray-700';
 });
 
 const itemTitleClass = computed(() => {

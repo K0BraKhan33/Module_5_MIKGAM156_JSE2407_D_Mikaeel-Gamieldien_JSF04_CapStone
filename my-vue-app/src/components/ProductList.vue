@@ -7,30 +7,54 @@
       </div>
       <!-- Shopping Cart and Wishlist Icons -->
       <div class="flex space-x-4 p-4">
-        <button @click="handleAuthButtonClick" :class="{ 'bg-red-500': loggedIn, 'bg-blue-500': !loggedIn }" class="text-white p-2 rounded-lg">
+        <button 
+          @click="handleAuthButtonClick" 
+          :class="['text-white p-2 rounded-lg', authButtonClass]"
+        >
           {{ loggedIn ? 'Sign Out' : 'Login' }}
         </button>
-        <button @click="redirectToCart" :class="['text-2xl', iconClass]">
+        <button 
+          @click="redirectToCart" 
+          :class="['text-2xl', iconClass, hoverIconClass]"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M6 6h15l1 10H8L6 6zM4 4h2l3.6 9.6L10.2 16H20v2H8.4l-1.6-2H3V4h1z" />
           </svg>
         </button>
-        <button @click="redirectToWishlist" :class="['text-2xl', iconClass]">
+        <button 
+          @click="redirectToWishlist" 
+          :class="['text-2xl', iconClass, hoverIconClass]"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 3l1.5 3h3.5l-2.7 2.5L15 12l-3-2-3 2 1-3-2.7-2.5h3.5L12 3zm0 12c2.1 0 4-1.7 4-4s-1.9-4-4-4-4 1.7-4 4 1.9 4 4 4zm0 2c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" />
           </svg>
         </button>
-        <button @click="goToComparison" :class="['text-2xl', buttonTextClass]">Compare Products</button>
+        <button 
+          @click="goToComparison" 
+          :class="['text-[1.75vw]', buttonTextClass, hoverButtonClass]"
+        >
+          Compare Products
+        </button>
         <!-- Theme Swap Button -->
-        <button @click="swapTheme" :class="['text-2xl', buttonTextClass]">
+        <button 
+          @click="swapTheme" 
+          :class="['text-[1.75vw]', buttonTextClass, hoverButtonClass]"
+        >
           Swap Theme
         </button>
       </div>
     </header>
 
     <!-- Sorting and Filtering -->
-    <SortControls :sortPrice="sortPrice" :sortType="sortType" :categories="categories" :isDefaultSort="isDefaultSort"
-      @update:sortPrice="updateSortPrice" @update:sortType="updateSortType" @sort-change="handleSortChange" />
+    <SortControls 
+      :sortPrice="sortPrice" 
+      :sortType="sortType" 
+      :categories="categories" 
+      :isDefaultSort="isDefaultSort"
+      @update:sortPrice="updateSortPrice" 
+      @update:sortType="updateSortType" 
+      @sort-change="handleSortChange" 
+    />
 
     <!-- Discounted Products -->
     <div v-if="isLoading" class="flex justify-center items-center h-full">
@@ -44,9 +68,17 @@
         <p class="text-[5vw]">Loading...</p>
       </div>
       <ul v-else class="flex flex-wrap -mx-4">
-        <li v-for="item in filteredItems" :key="item.id" class="flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 min-h-[60vw] sm:min-h-[25vw] md:min-h-[20vw] lg:min-h-[15vw] cursor-pointer" :class="themeClass">
-          <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`" class="block h-full">
-            <div :class="['border p-4 rounded-lg shadow-sm h-full flex flex-col', themeClass]">
+        <li 
+          v-for="item in filteredItems" 
+          :key="item.id" 
+          class="flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 min-h-[60vw] sm:min-h-[25vw] md:min-h-[20vw] lg:min-h-[15vw] cursor-pointer hover:bg-purple-600 transition" 
+          :class="themeClass"
+        >
+          <a 
+            :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`" 
+            class="block h-full"
+          >
+            <div :class="['border p-4 rounded-lg shadow-sm h-full flex flex-col', themeClass, hoverItemClass]">
               <img :src="item.image" :alt="item.title" class="w-full max-h-[35vw] object-contain mb-4">
               <div class="flex flex-col flex-grow">
                 <div class="mb-4">
@@ -65,16 +97,23 @@
               </div>
             </div>
           </a>
-          <button @click="toggleComparison(item)" :class="['mt-auto py-2 px-4 rounded', themeButtonClass]">
+          <button 
+            @click="toggleComparison(item)" 
+            :class="['mt-auto py-2 px-4 rounded', themeButtonClass, hoverButtonClass]"
+          >
             {{ isInComparison(item.id) ? 'Remove from Comparison' : 'Add to Comparison' }}
           </button>
-          <button @click="addToCart(item.id)" :class="['mt-2 py-2 px-4 rounded', themeButtonClass]">Add to Cart</button>
+          <button 
+            @click="addToCart(item.id)" 
+            :class="['mt-2 py-2 px-4 rounded', themeButtonClass, hoverButtonClass]"
+          >
+            Add to Cart
+          </button>
         </li>
       </ul>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import useProductList from './js/ProductList.js';
@@ -137,6 +176,18 @@ const iconClass = computed(() => {
   return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
 });
 
+const hoverButtonClass = computed(() => {
+  return currentTheme.value === 'light' ? 'hover:bg-amber-300 transition' : 'hover:bg-pink-600 transition';
+});
+
+const hoverIconClass = computed(() => {
+  return currentTheme.value === 'light' ? 'hover:text-amber-300 transition' : 'hover:text-pink-600 transition';
+});
+
+const hoverItemClass = computed(() => {
+  return currentTheme.value === 'light' ? 'hover:bg-amber-300 transition' : 'hover:bg-pink-600 transition';
+});
+
 const themeListBorderClass = computed(() => {
   return currentTheme.value === 'light' ? 'border-pink-500' : 'border-amber-500';
 });
@@ -161,7 +212,3 @@ onMounted(() => {
   fetchProducts();
 });
 </script>
-
-<style scoped>
-/* Add any additional styles here */
-</style>

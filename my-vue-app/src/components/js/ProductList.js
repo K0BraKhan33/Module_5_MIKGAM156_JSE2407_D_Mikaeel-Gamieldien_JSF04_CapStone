@@ -22,11 +22,7 @@ export default function useProductList() {
   }
 
   async function fetchProducts() {
-    if (!userId.value) {
-      console.error('User ID is not set');
-      showNotification('Please log in to fetch products.');
-      return;
-    }
+  
 
     try {
       const response = await fetch('https://fakestoreapi.com/products');
@@ -64,6 +60,7 @@ export default function useProductList() {
     const event = new CustomEvent("cart-updated");
     window.dispatchEvent(event);
 }
+
 
   function handleSortChange() {
     // Your sorting logic here
