@@ -25,6 +25,7 @@
     </div>
     <p v-else class="text-gray-500">No discounted products available.</p>
   </div>
+  
 </template>
 
 <script setup>

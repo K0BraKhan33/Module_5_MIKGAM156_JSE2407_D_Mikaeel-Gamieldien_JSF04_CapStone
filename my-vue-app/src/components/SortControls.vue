@@ -1,85 +1,115 @@
 <template>
-  <div :class="themeClass">
-    <div>
-      <label for="sortCriteria" class="block text-sm font-medium text-gray-700">Sort by</label>
-      <select id="sortCriteria" v-model="localSortCriteria" @change="emitSortChange"
-        class="mt-1 block w-[25%] pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-        <option value="">Select</option>
-        <option value="priceAsc">Price: Low to High</option>
-        <option value="priceDesc">Price: High to Low</option>
-        <option value="titleAsc">Title: A to Z</option>
-        <option value="titleDesc">Title: Z to A</option>
-      </select>
- 
-      <label for="categoryFilter" class="block text-sm font-medium text-gray-700">Filter by Category</label>
-      <select id="categoryFilter" v-model="localCategory" @change="emitSortChange"
-        class="mt-1 block w-[25%] pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-        <option value="">All Categories</option>
-        <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
-      </select>
+  <div :class="['p-4', themeClass]">
+    <div class="flex flex-col md:flex-row md:justify-between">
+      <!-- Sorting Controls -->
+      <div class="mb-4 md:mb-0">
+        <label for="sortPrice" :class="labelClass">Sort by Price:</label>
+        <select 
+          id="sortPrice" 
+          v-model="selectedSortPrice" 
+          @change="updateSortPrice" 
+          :class="selectClass"
+        >
+          <option value="">Select</option>
+          <option value="lowest">Lowest to Highest</option>
+          <option value="highest">Highest to Lowest</option>
+        </select>
+      </div>
+
+      <div class="mb-4 md:mb-0">
+        <label for="sortType" :class="labelClass">Sort by Title:</label>
+        <select 
+          id="sortType" 
+          v-model="selectedSortType" 
+          @change="updateSortType" 
+          :class="selectClass"
+        >
+          <option value="">Select</option>
+          <option value="AtoZ">A to Z</option>
+          <option value="ZtoA">Z to A</option>
+        </select>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="mb-4 md:mb-0">
+        <label for="category" :class="labelClass">Filter by Category:</label>
+        <select 
+          id="category" 
+          v-model="selectedCategory" 
+          @change="filterCategory" 
+          :class="selectClass"
+        >
+          <option value="">All Categories</option>
+          <option v-for="category in categories" :key="category" :value="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Reset Filters and Sorting -->
+      <button 
+        @click="resetFilters" 
+        :class="['mt-4 md:mt-0 px-4 py-2 rounded', resetButtonClass]"
+      >
+        Reset Filters & Sorting
+      </button>
     </div>
-    <button v-if="!isDefaultSort" @click="resetFilters" class="mt-6 py-2 px-4 bg-red-500 text-white rounded-md">Reset Filters</button>
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SortControls',
-  props: {
-    sortCriteria: String,
-    categories: Array,
-    selectedCategory: String,
-    isDefaultSort: Boolean
-  },
-  data() {
-    return {
-      localSortCriteria: this.getStoredSortCriteria() || this.sortCriteria,
-      localCategory: this.getStoredCategory() || this.selectedCategory
-    };
-  },
-  methods: {
-    emitSortChange() {
-      this.$emit('update:sortCriteria', this.localSortCriteria);
-      this.$emit('update:selectedCategory', this.localCategory);
-      this.$emit('sort-change');
-      this.saveToLocalStorage();
-    },
-    resetFilters() {
-      this.localSortCriteria = '';
-      this.localCategory = '';
-      this.emitSortChange();
-    },
-    saveToLocalStorage() {
-      localStorage.setItem('sortCriteria', this.localSortCriteria);
-      localStorage.setItem('category', this.localCategory);
-    },
-    getStoredSortCriteria() {
-      return localStorage.getItem('sortCriteria');
-    },
-    getStoredCategory() {
-      return localStorage.getItem('category');
-    }
-  },
-  watch: {
-    sortCriteria(newVal) {
-      this.localSortCriteria = newVal;
-    },
-    selectedCategory(newVal) {
-      this.localCategory = newVal;
-    }
-  },
-  async created() {
-    try {
-      const response = await fetch('https://fakestoreapi.com/products/categories');
-      const categories = await response.json();
-      this.$emit('update:categories', categories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  }
-};
-</script>
+<script setup>
+import { ref, watch, computed, onMounted } from 'vue';
 
-<style scoped>
-/* Add any custom styles here */
-</style>
+const props = defineProps({
+  categories: Array,
+  sortPrice: String,
+  sortType: String,
+  isDefaultSort: Boolean,
+});
+
+const emit = defineEmits(['update:sortPrice', 'update:sortType', 'filter-category', 'reset']);
+
+const selectedSortPrice = ref(props.sortPrice);
+const selectedSortType = ref(props.sortType);
+const selectedCategory = ref('');
+
+const updateSortPrice = () => {
+  emit('update:sortPrice', selectedSortPrice.value);
+};
+
+const updateSortType = () => {
+  emit('update:sortType', selectedSortType.value);
+};
+
+const filterCategory = () => {
+  emit('filter-category', selectedCategory.value);
+};
+
+const resetFilters = () => {
+  selectedSortPrice.value = '';
+  selectedSortType.value = '';
+  selectedCategory.value = '';
+  emit('reset');
+};
+
+const themeClass = computed(() => localStorage.getItem('theme') === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100');
+const labelClass = computed(() => localStorage.getItem('theme') === 'light' ? 'text-gray-900' : 'text-gray-100');
+const selectClass = computed(() => localStorage.getItem('theme') === 'light' ? 'bg-gray-200 text-gray-900' : 'bg-gray-800 text-gray-100');
+const resetButtonClass = computed(() => localStorage.getItem('theme') === 'light' ? 'bg-red-500 text-white' : 'bg-red-700 text-gray-100');
+
+// Watch for prop changes
+watch(() => props.sortPrice, (newVal) => {
+  selectedSortPrice.value = newVal;
+});
+
+watch(() => props.sortType, (newVal) => {
+  selectedSortType.value = newVal;
+});
+
+onMounted(() => {
+  if (props.isDefaultSort) {
+    selectedSortPrice.value = 'lowest'; // or any default value
+    selectedSortType.value = 'AtoZ'; // or any default value
+  }
+});
+</script>

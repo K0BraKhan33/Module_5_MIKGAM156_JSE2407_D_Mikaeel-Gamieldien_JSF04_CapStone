@@ -14,7 +14,7 @@ const routes = [
   { path: '/about', component: ProductDetail, props: true },
   { path: '/cart', component: UserCart },
   { path: '/compare', component: ProductCompare }, // Add the comparison route
-  { path: '/', redirect: '/login' }
+  { path: '/', redirect: '/products' }
 ];
 
 const router = createRouter({

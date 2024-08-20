@@ -1,4 +1,3 @@
-//ProjectList.js
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -22,8 +21,6 @@ export default function useProductList() {
   }
 
   async function fetchProducts() {
-  
-
     try {
       const response = await fetch('https://fakestoreapi.com/products');
       if (!response.ok) throw new Error('Network response was not ok');
@@ -35,18 +32,17 @@ export default function useProductList() {
 
       categories.value = [...new Set(data.map(item => item.category))];
       isLoading.value = false;
-      handleSortChange();
+      handleSortChange(); // Call handleSortChange after fetching products
     } catch (error) {
       console.error('Error fetching products:', error);
-
     }
   }
 
-   function addToCart(productId) {
+  function addToCart(productId) {
     const userId = localStorage.getItem("userId");
     if (!userId) {
-        alert("You must be logged in to add items to the cart.");
-        return;
+      alert("You must be logged in to add items to the cart.");
+      return;
     }
     const cartKey = `${userId}cartItems`;
     let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
@@ -59,15 +55,19 @@ export default function useProductList() {
     // Notify the cart update
     const event = new CustomEvent("cart-updated");
     window.dispatchEvent(event);
-}
-
-
-  function handleSortChange() {
-    // Your sorting logic here
   }
 
   function goToComparison() {
-    router.push(userId.value ? '/compare' : '/login');
+    const userId = localStorage.getItem("userId");
+    if(!userId){
+      alert("You must be logged in to access Comparason Table.");
+      return;
+    
+  }
+  else{
+   
+    router.push('/compare');
+  }
   }
 
   function handleAuthButtonClick() {
@@ -75,7 +75,6 @@ export default function useProductList() {
       localStorage.removeItem('userId');
       localStorage.removeItem('token');
       localStorage.removeItem('comparisonList');
-      localStorage.removeItem('prePath');
       localStorage.setItem('loggedIn', 'false');
       loggedIn.value = false;
     } else {
@@ -92,14 +91,18 @@ export default function useProductList() {
     if (loggedIn.value) {
       router.push(`/cart?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
     } else {
-      showNotification('You are not logged in.');
+      showNotification('You are not logged in. Please log in to access the cart.');
     }
   }
-
+  
   function redirectToWishlist() {
-    router.push(userId.value ? `/wishlist?userId=${userId.value}` : '/login?redirect=wishlist');
+    if (userId.value) {
+      router.push(`/wishlist?userId=${userId.value}`);
+    } else {
+      showNotification('You are not logged in. Please log in to access the wishlist.');
+    }
   }
-
+  
   function toggleComparison(item) {
     let comparisonListArray = JSON.parse(localStorage.getItem('comparisonList') || '[]');
     const itemIndex = comparisonListArray.findIndex(i => i.id === item.id);
@@ -133,6 +136,29 @@ export default function useProductList() {
     handleSortChange();
   }
 
+  function handleSortChange() {
+    let sortedItems = [...filteredItems.value];
+
+    if (sortPrice.value) {
+      sortedItems.sort((a, b) => {
+        const priceComparison = sortPrice.value === 'low-to-high'
+          ? a.price - b.price
+          : b.price - a.price;
+        
+        return priceComparison;
+      });
+    }
+
+    if (sortType.value) {
+      sortedItems.sort((a, b) => {
+        const titleComparison = a.title.localeCompare(b.title);
+        return sortType.value === 'A-Z' ? titleComparison : -titleComparison;
+      });
+    }
+
+    filteredItems.value = sortedItems;
+  }
+
   onMounted(() => {
     const prePath = localStorage.getItem('prePath');
     const urlParams = new URLSearchParams(window.location.search);
@@ -155,7 +181,6 @@ export default function useProductList() {
     categories,
     addToCart,
     fetchProducts,
-    addToCart,
     userId,
     handleSortChange,
     isDefaultSort,

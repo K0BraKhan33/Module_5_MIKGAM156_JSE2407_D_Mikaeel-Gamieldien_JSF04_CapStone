@@ -4,7 +4,7 @@
     <header :class="[headerClass, 'p-4 flex items-center']">
       <a
         id="backLinkCart"
-        :href="backUrl"
+        :href="`${backUrl}`"
         :class="headerLinkClass"
         class="flex items-center space-x-2"
       >
@@ -20,23 +20,32 @@
 
     <!-- Cart Items List -->
     <ul class="flex flex-wrap gap-4">
+     
       <li v-for="item in cartItems" :key="item.id"
+      
           :class="[itemClass, 'flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 hover:shadow-lg transition-shadow']">
+          <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`"
+          class="block h-full">
         <div class="flex flex-col h-full">
           <img :src="item.image" :alt="item.title"
-              class="w-full h-48 object-contain mb-4 hover:opacity-80 transition-opacity">
-          <h2 :class="[itemTitleClass, 'hover:text-gray-500 transition-colors']">{{ item.title }}</h2>
-          <p :class="[itemPriceClass, 'hover:text-gray-700 transition-colors']">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
-          <p :class="[itemQuantityClass, 'hover:text-gray-600 transition-colors']">Quantity: {{ item.quantity }}</p>
+              class="w-full h-48 object-contain mb-4">
+          <h2 :class="[itemTitleClass]">{{ item.title }}</h2>
+          <p :class="[itemPriceClass]">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
+          <p :class="[itemQuantityClass]">Quantity: {{ item.quantity }}</p>
+     
 
-          <input type="number" min="1" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)"
+       
+        </div>
+      </a>
+        <input type="number" min="1" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)"
               :class="[inputClass, 'focus:ring-2 focus:ring-amber-400 transition-ring']" />
 
           <button @click.prevent="removeFromCart(item.id)"
               :class="[removeButtonClass, 'hover:bg-red-600 transition-colors']">Remove</button>
-        </div>
       </li>
+   
     </ul>
+  
 
     <!-- Clear Cart Button -->
     <button @click.prevent="clearCart" :class="[clearButtonClass, 'hover:bg-gray-600 transition-colors']">Clear Cart</button>
@@ -82,7 +91,7 @@ const themeClass = computed(() => {
 });
 
 const headerClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-gray-200 text-pink-600' : 'bg-gray-700 text-amber-400';
+  return currentTheme.value === 'light' ? 'text-[1.75vw] bg-gray-200 text-pink-600' : 'bg-gray-700 text-amber-400';
 });
 
 const headerLinkClass = computed(() => {
@@ -98,23 +107,23 @@ const titleClass = computed(() => {
 });
 
 const itemClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-white border border-gray-300 hover:bg-gray-50' : 'bg-gray-800 border border-gray-600 hover:bg-gray-700';
+  return currentTheme.value === 'light' ? 'bg-white border border-gray-300 hover:bg-amber-400' : 'bg-gray-800 border border-gray-600 hover:bg-pink-600';
 });
 
 const itemTitleClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-gray-800' : 'text-gray-200';
+  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
 });
 
 const itemPriceClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-gray-600' : 'text-gray-400';
+  return currentTheme.value === 'light' ? 'text-pink-400' : 'text-amber-200';
 });
 
 const itemQuantityClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-gray-700' : 'text-gray-300';
+  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
 });
 
 const inputClass = computed(() => {
-  return currentTheme.value === 'light' ? 'border-gray-300' : 'border-gray-600';
+  return currentTheme.value === 'light' ? 'border-gray-300 text-black' : 'border-gray-600 text-black';
 });
 
 const removeButtonClass = computed(() => {
