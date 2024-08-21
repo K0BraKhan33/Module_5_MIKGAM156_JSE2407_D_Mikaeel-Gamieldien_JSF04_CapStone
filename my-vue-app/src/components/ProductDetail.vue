@@ -99,6 +99,8 @@ export default {
     const { 
       product,
       isFavorited,
+      sortPrice,
+      sortType,
       loading,
       fetchProductDetail: fetchProductData, 
       init 
@@ -147,6 +149,11 @@ const headerTextClass = computed(() => {
       isFavorited,
       loading,
       swapTheme,
+      headerClass,
+      headerLinkClass,
+      sortPrice,
+      sortType,
+      currentTheme,
       themeClass,
       headerTextClass,
       siteTitle,

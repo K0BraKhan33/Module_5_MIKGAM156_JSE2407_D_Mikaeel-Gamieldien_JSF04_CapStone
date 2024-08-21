@@ -177,6 +177,7 @@ const itemRatingClass = computed(() => {
 });
 
 onMounted(() => {
+  localStorage.setItem('prePath', 'products')
   fetchProducts();
 });
 </script>
