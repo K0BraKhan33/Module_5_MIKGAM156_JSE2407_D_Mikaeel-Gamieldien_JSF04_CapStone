@@ -10,5 +10,21 @@
   <body class="bg-gray-100">
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
+    <script>
+      function isDarkmode(){
+        if (!localStorage.getItem('theme')){
+        const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+        if (isDarkMode) {
+          localStorage.setItem('theme', 'dark');
+        // Apply dark mode styles or settings here
+        } else {
+          localStorage.setItem('theme', light);
+        // Apply light mode styles or settings here
+        }
+      }
+    }
+      isDarkmode()
+    </script>
   </body>
 </html>

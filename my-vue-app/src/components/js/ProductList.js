@@ -1,7 +1,7 @@
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, watch, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
-export const totalProducts = ref(0); // Initialize totalProducts as a ref
+export const totalProducts = ref(0);
 
 export default function useProductList() {
   const filteredItems = ref([]);
@@ -14,8 +14,9 @@ export default function useProductList() {
   const loggedIn = ref(false);
   const comparisonList = ref([]);
   const router = useRouter();
+  const originalList = ref([]);
+  const route = useRoute();
 
-  // Function to show user notifications
   function showNotification(message) {
     alert(message); // Simple example
   }
@@ -26,16 +27,57 @@ export default function useProductList() {
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       filteredItems.value = data;
-      
-      // Update totalProducts based on the number of products fetched
+      originalList.value = [...data]; // Initialize originalList here
       totalProducts.value = filteredItems.value.length;
-
       categories.value = [...new Set(data.map(item => item.category))];
       isLoading.value = false;
-      handleSortChange(); // Call handleSortChange after fetching products
+      handleSortChange(); // Apply sorting and filtering based on initial URL
     } catch (error) {
       console.error('Error fetching products:', error);
     }
+  }
+
+  function handleSortChange() {
+    let sortedItems = [...originalList.value]; // Use the stored list for filtering and sorting
+
+    if (sortType.value && sortType.value !== '') {
+      sortedItems = sortedItems.filter(item => item.category === sortType.value);
+    }
+
+    if (sortPrice.value) {
+      sortedItems.sort((a, b) => {
+        switch (sortPrice.value) {
+          case 'priceAsc':
+            return a.price - b.price;
+          case 'priceDesc':
+            return b.price - a.price;
+          case 'titleAsc':
+            return a.title.localeCompare(b.title);
+          case 'titleDesc':
+            return b.title.localeCompare(a.title);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    filteredItems.value = sortedItems;
+    updateUrlParams(); // Update URL with current sorting and filtering parameters
+  }
+
+  function updateUrlParams() {
+    router.push({
+      query: {
+        sortPrice: sortPrice.value || undefined,
+        sortType: sortType.value || undefined
+      }
+    });
+  }
+
+  function resetFilters() {
+    sortPrice.value = '';
+    sortType.value = '';
+    handleSortChange();
   }
 
   function addToCart(productId) {
@@ -46,28 +88,19 @@ export default function useProductList() {
     }
     const cartKey = `${userId}cartItems`;
     let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
-
-    // Add product to cart
     cart.push(productId);
-
     localStorage.setItem(cartKey, JSON.stringify(cart));
-
-    // Notify the cart update
-    const event = new CustomEvent("cart-updated");
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent("cart-updated"));
   }
 
   function goToComparison() {
     const userId = localStorage.getItem("userId");
-    if(!userId){
-      alert("You must be logged in to access Comparason Table.");
+    if (!userId) {
+      alert("You must be logged in to access the Comparison Table.");
       return;
-    
-  }
-  else{
-   
-    router.push('/compare');
-  }
+    } else {
+      router.push('/compare');
+    }
   }
 
   function handleAuthButtonClick() {
@@ -83,10 +116,6 @@ export default function useProductList() {
     }
   }
 
-  function extractNumericId(id) {
-    return id ? id.match(/\d+/)?.[0] || '' : '';
-  }
-
   function redirectToCart() {
     if (loggedIn.value) {
       router.push(`/cart?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
@@ -94,7 +123,7 @@ export default function useProductList() {
       showNotification('You are not logged in. Please log in to access the cart.');
     }
   }
-  
+
   function redirectToWishlist() {
     if (userId.value) {
       router.push(`/wishlist?userId=${userId.value}`);
@@ -102,11 +131,10 @@ export default function useProductList() {
       showNotification('You are not logged in. Please log in to access the wishlist.');
     }
   }
-  
+
   function toggleComparison(item) {
     let comparisonListArray = JSON.parse(localStorage.getItem('comparisonList') || '[]');
     const itemIndex = comparisonListArray.findIndex(i => i.id === item.id);
-
     if (itemIndex >= 0) {
       comparisonListArray.splice(itemIndex, 1);
     } else {
@@ -117,7 +145,6 @@ export default function useProductList() {
         return;
       }
     }
-
     localStorage.setItem('comparisonList', JSON.stringify(comparisonListArray));
     comparisonList.value = comparisonListArray;
   }
@@ -136,42 +163,29 @@ export default function useProductList() {
     handleSortChange();
   }
 
-  function handleSortChange() {
-    let sortedItems = [...filteredItems.value];
-
-    if (sortPrice.value) {
-      sortedItems.sort((a, b) => {
-        const priceComparison = sortPrice.value === 'low-to-high'
-          ? a.price - b.price
-          : b.price - a.price;
-        
-        return priceComparison;
-      });
-    }
-
-    if (sortType.value) {
-      sortedItems.sort((a, b) => {
-        const titleComparison = a.title.localeCompare(b.title);
-        return sortType.value === 'A-Z' ? titleComparison : -titleComparison;
-      });
-    }
-
-    filteredItems.value = sortedItems;
+  function extractNumericId(id) {
+    return parseInt(id, 10);
   }
 
   onMounted(() => {
-    const prePath = localStorage.getItem('prePath');
-    const urlParams = new URLSearchParams(window.location.search);
     const userIdFromStorage = localStorage.getItem('userId');
-    const userIdFromUrl = urlParams.get('userId') || userIdFromStorage;
+    const userIdFromUrl = route.query.userId || userIdFromStorage;
 
     userId.value = extractNumericId(userIdFromUrl);
     loggedIn.value = localStorage.getItem('loggedIn') === 'true';
     comparisonList.value = JSON.parse(localStorage.getItem('comparisonList') || '[]');
-    localStorage.setItem('prePath', window.location.hash.split('?')[0].split('/')[1]);
+    sortPrice.value = route.query.sortPrice || '';
+    sortType.value = route.query.sortType || '';
 
     fetchProducts();
   });
+
+  // Watch for route query changes and update sorting/filtering
+  watch(() => route.query, () => {
+    sortPrice.value = route.query.sortPrice || '';
+    sortType.value = route.query.sortType || '';
+    handleSortChange();
+  }, { immediate: true });
 
   return {
     filteredItems,

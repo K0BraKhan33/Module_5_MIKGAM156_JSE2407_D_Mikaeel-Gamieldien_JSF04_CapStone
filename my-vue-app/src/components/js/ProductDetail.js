@@ -16,6 +16,7 @@ export function useProductDetail() {
 
     sortPrice.value = urlParams.get('sortPrice') || ''; 
     sortType.value = urlParams.get('sortType') || ''; 
+    console.log(sortPrice.value, sortType.value)
 
     fetchProductData(id);
   };
@@ -45,6 +46,7 @@ export function useProductDetail() {
             discountPercentage: null,
             saleEndDate: null
           };
+          init()
         }
         
         isFavorited.value = checkWishlist(data.id);
@@ -108,6 +110,11 @@ export function useProductDetail() {
     product,
     isFavorited,
     loading,
+    sortPrice,
+    sortType,
+    userId,
+    updateBackLink,
+    checkWishlist, // Ensure this method is exposed
     fetchProductDetail: fetchProductData, // Ensure this method is exposed
     init
   };

@@ -38,7 +38,7 @@ const currentTheme = ref(localStorage.getItem('theme') || 'light');
 onMounted(async () => {
   await fetchProductsAndUpdate();
   window.addEventListener('theme-changed', async () => {
-    currentTheme.value = localStorage.getItem('theme') || 'light';
+    currentTheme.value = localStorage.getItem('theme');
     await fetchProductsAndUpdate();
   });
 });

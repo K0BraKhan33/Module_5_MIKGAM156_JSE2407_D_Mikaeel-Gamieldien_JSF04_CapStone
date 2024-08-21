@@ -67,14 +67,7 @@ onMounted(() => {
   comparisonItems.value = comparisonList;
 });
 
-const currentTheme = ref(localStorage.getItem('theme') || 'light');
-
-const swapTheme = () => {
-  const newTheme = currentTheme.value === 'light' ? 'dark' : 'light';
-  currentTheme.value = newTheme;
-  localStorage.setItem('theme', newTheme);
-  window.dispatchEvent(new Event('theme-changed'));
-};
+const currentTheme = ref(localStorage.getItem('theme'));
 
 const themeClass = computed(() => {
   return currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100';

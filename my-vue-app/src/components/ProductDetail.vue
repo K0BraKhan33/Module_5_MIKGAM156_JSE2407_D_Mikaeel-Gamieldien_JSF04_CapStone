@@ -2,7 +2,7 @@
   <div :class="themeClass">
     <!-- Header Section -->
     <header :class="['p-4 flex items-center', themeClass]">
-      <a id="backLink" href="#" :class="headerTextClass">
+      <a id="backLink" @click.prevent="goBack" :class="headerTextClass" href="#">
         <!-- Back Arrow Icon -->
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -98,11 +98,29 @@ import { useProductDetail } from './js/ProductDetail.js';
 
 export default {
   setup() {
-    const { product, isFavorited, loading, init } = useProductDetail();
+    const {     product,
+    isFavorited,
+    loading,
+    sortPrice,
+    sortType,
+    userId,
+    updateBackLink,
+    checkWishlist, // Ensure this method is exposed
+    fetchProductDetail: fetchProductData, // Ensure this method is exposed
+    init } = useProductDetail();
+
+    const previousUrl = ref('');
 
     onMounted(() => {
       init();
+
+      // Save the current URL with its query parameters
+      previousUrl.value = document.referrer || '/';
     });
+
+    const goBack = () => {
+      window.location.href = previousUrl.value;
+    };
 
     const currentTheme = ref(localStorage.getItem('theme') || 'dark');
 
@@ -122,7 +140,8 @@ export default {
       isFavorited,
       loading,
       swapTheme,
-      themeClass
+      themeClass,
+      goBack
     };
   }
 };
