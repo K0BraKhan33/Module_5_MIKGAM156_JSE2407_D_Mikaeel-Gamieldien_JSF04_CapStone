@@ -2,7 +2,7 @@
   <div :class="[themeClass, 'min-h-screen p-4']">
     <!-- Header Section -->
     <header :class="[headerClass, 'p-4 text-[3vw] flex items-center']">
-      <a href="#/products" :class="headerLinkClass" class="flex items-center space-x-2">
+      <a id="backLink" :class="headerLinkClass" class="flex items-center space-x-2" :href="`#`">
         <!-- Back Arrow Icon -->
         <svg xmlns="http://www.w3.org/2000/svg" :class="['w-6 h-6 ', headerLinkClass]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -82,7 +82,18 @@ onMounted(() => {
   sortPrice.value = route.query.sortPrice || '';
   sortType.value = route.query.sortType || '';
   comparisonItems.value = JSON.parse(localStorage.getItem('comparisonList') || '[]');
+  updateBackLink()
 });
+
+const updateBackLink = () => {
+    const backLink = document.getElementById('backLink');
+    if (backLink) {
+      // Update the back link with sorting and filtering parameters
+      const url = new URL(window.location.href);
+      url.hash = `#/products/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+      backLink.href = url.toString();
+    }
+  };
 
 const themeClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100');
 const headerClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-200 text-pink-300' : 'bg-gray-700 text-amber-600');

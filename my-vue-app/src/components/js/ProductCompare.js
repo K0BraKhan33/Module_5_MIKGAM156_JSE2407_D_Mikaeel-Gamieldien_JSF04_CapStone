@@ -18,6 +18,7 @@ export function addToComparison(item) {
   }
 }
 
+
 export function getComparisonItems() {
   return JSON.parse(localStorage.getItem('comparisonItems')) || [];
 }

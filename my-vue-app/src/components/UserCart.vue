@@ -2,12 +2,7 @@
   <div :class="[themeClass, 'min-h-screen p-4']">
     <!-- Header Section -->
     <header :class="[headerClass, 'p-4 flex items-center']">
-      <a
-        id="backLinkCart"
-        :href="`${backUrl}`"
-        :class="headerLinkClass"
-        class="flex items-center space-x-2"
-      >
+      <a id="backLink" :href="`#/`" :class="headerLinkClass" class="flex items-center space-x-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
@@ -20,35 +15,34 @@
 
     <!-- Cart Items List -->
     <ul class="flex flex-wrap gap-4">
-     
+
       <li v-for="item in cartItems" :key="item.id"
-      
-          :class="[itemClass, 'flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 hover:shadow-lg transition-shadow']">
-          <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`"
+        :class="[itemClass, 'flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 hover:shadow-lg transition-shadow']">
+        <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`"
           class="block h-full">
-        <div class="flex flex-col h-full">
-          <img :src="item.image" :alt="item.title"
-              class="w-full h-48 object-contain mb-4">
-          <h2 :class="[itemTitleClass]">{{ item.title }}</h2>
-          <p :class="[itemPriceClass]">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
-          <p :class="[itemQuantityClass]">Quantity: {{ item.quantity }}</p>
-     
+          <div class="flex flex-col h-full">
+            <img :src="item.image" :alt="item.title" class="w-full h-48 object-contain mb-4">
+            <h2 :class="[itemTitleClass]">{{ item.title }}</h2>
+            <p :class="[itemPriceClass]">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
+            <p :class="[itemQuantityClass]">Quantity: {{ item.quantity }}</p>
 
-       
-        </div>
-      </a>
+
+
+          </div>
+        </a>
         <input type="number" min="1" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)"
-              :class="[inputClass, 'focus:ring-2 focus:ring-amber-400 transition-ring']" />
+          :class="[inputClass, 'focus:ring-2 focus:ring-amber-400 transition-ring']" />
 
-          <button @click.prevent="removeFromCart(item.id)"
-              :class="[removeButtonClass, 'hover:bg-red-600 transition-colors']">Remove</button>
+        <button @click.prevent="removeFromCart(item.id)"
+          :class="[removeButtonClass, 'hover:bg-red-600 transition-colors']">Remove</button>
       </li>
-   
+
     </ul>
-  
+
 
     <!-- Clear Cart Button -->
-    <button @click.prevent="clearCart" :class="[clearButtonClass, 'hover:bg-gray-600 transition-colors']">Clear Cart</button>
+    <button @click.prevent="clearCart" :class="[clearButtonClass, 'hover:bg-gray-600 transition-colors']">Clear
+      Cart</button>
 
     <!-- Cart Summary -->
     <div class="mt-4">
@@ -62,21 +56,17 @@
 import { ref, computed, onMounted } from 'vue';
 import useUserCart from './js/UserCart.js';
 
-const { cartItems, totalCost, itemCount, updateCartItem, removeCartItem, clearCart } = useUserCart();
+const { cartItems, totalCost, itemCount, updateCartItem, removeCartItem, clearCart, updateBackLink } = useUserCart();
+updateBackLink() 
 
 const currentTheme = ref(localStorage.getItem('theme') || 'light');
 
+onMounted(() => { updateBackLink() })
 // Watch for theme change event
 window.addEventListener('theme-changed', () => {
   currentTheme.value = localStorage.getItem('theme') || 'light';
 });
 
-const getBackUrl = () => {
-  const prePath = localStorage.getItem('prePath');
-  return !prePath || prePath === 'cart' ? '/#/products' : `/#/${prePath}`;
-};
-
-const backUrl = getBackUrl();
 
 const updateQuantity = (productId, quantity) => {
   updateCartItem(productId, parseInt(quantity, 10));

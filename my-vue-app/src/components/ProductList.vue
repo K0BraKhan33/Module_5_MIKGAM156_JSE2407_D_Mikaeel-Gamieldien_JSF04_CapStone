@@ -178,6 +178,5 @@ const itemRatingClass = computed(() => {
 
 onMounted(() => {
   fetchProducts();
-  localStorage.setItem('theme', 'light');
 });
 </script>

@@ -4,6 +4,8 @@ import { ref, computed, onMounted } from 'vue';
 export default function useUserCart() {
     const cartItems = ref([]);
     const userId = localStorage.getItem("userId");
+    const sortPrice=ref([]);
+    const sortType=ref([]);
 
     const fetchProductDetails = async (productId) => {
         try {
@@ -64,6 +66,16 @@ export default function useUserCart() {
         fetchCartItems();
     };
 
+    const updateBackLink = () => {
+        const backLink = document.getElementById('backLink');
+        if (backLink) {
+          // Update the back link with sorting and filtering parameters
+          const url = new URL(window.location.href);
+          url.hash = `#/products/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+          backLink.href = url.toString();
+        }
+      };
+
     const clearCart = () => {
         const cartKey = `${userId}cartItems`;
         localStorage.removeItem(cartKey);
@@ -85,6 +97,7 @@ export default function useUserCart() {
         fetchCartItems,
         updateCartItem,
         removeCartItem,
-        clearCart
+        clearCart,
+        updateBackLink
     };
 }
