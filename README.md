@@ -6,6 +6,9 @@
 This is an extention of my module 4 Project, ive added a comparason table, cart, themechange and discounted produtcs. 
 
 ## Link to video
+```webview
+https://youtu.be/L3MepMa1xQg
+```
 
 ## Link to websight
 - you will need to login to a github account
