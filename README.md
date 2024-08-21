@@ -7,10 +7,17 @@ This is an extention of my module 4 Project, ive added a comparason table, cart,
 
 ## Link to video
 
-##Link to 
+## Link to websight
+```webview
+https://module-5-mikgam-156-jse-2407-d-mikaeel-gamieldien-7tnqxr6fg.vercel.app/
+```
 
 
 ## Installation
+
+## ProjectHelp
+- all code has been either tweeked or changed, help rom open saurce users was used to fix problems, all code was done by me. cope stratagies might of been used from other projects but all interagtions were done by me.
+
 
 To get started with this project, follow these steps:
 
@@ -100,6 +107,7 @@ For development purposes, you can use the following commands:
 - **Build for Production:** `npm run build`
 -**preview production build:** `npm run preview`
 - **Run Tests:** `npm test`
+
 
 ## License
 
