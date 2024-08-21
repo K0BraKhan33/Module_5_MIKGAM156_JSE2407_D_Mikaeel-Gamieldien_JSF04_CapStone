@@ -15,12 +15,6 @@
             <path d="M6 6h15l1 10H8L6 6zM4 4h2l3.6 9.6L10.2 16H20v2H8.4l-1.6-2H3V4h1z" />
           </svg>
         </button>
-        <button @click="redirectToWishlist" :class="['text-2xl', iconClass, hoverIconClass]">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path
-              d="M12 3l1.5 3h3.5l-2.7 2.5L15 12l-3-2-3 2 1-3-2.7-2.5h3.5L12 3zm0 12c2.1 0 4-1.7 4-4s-1.9-4-4-4-4 1.7-4 4 1.9 4 4 4zm0 2c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z" />
-          </svg>
-        </button>
         <button @click="goToComparison" :class="['text-[1.75vw]', buttonTextClass, hoverButtonClass]">
           Compare Products
         </button>

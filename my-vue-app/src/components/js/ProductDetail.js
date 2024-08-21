@@ -1,4 +1,4 @@
-//ProjectDetail.js
+// ProjectDetail.js
 import { ref, onMounted } from 'vue';
 
 export function useProductDetail() {
@@ -16,7 +16,8 @@ export function useProductDetail() {
 
     sortPrice.value = urlParams.get('sortPrice') || ''; 
     sortType.value = urlParams.get('sortType') || ''; 
-    console.log(sortPrice.value, sortType.value)
+    userId.value = urlParams.get('userId') || ''; // Added userId extraction
+    console.log(sortPrice.value, sortType.value);
 
     fetchProductData(id);
   };
@@ -46,7 +47,6 @@ export function useProductDetail() {
             discountPercentage: null,
             saleEndDate: null
           };
-          init()
         }
         
         isFavorited.value = checkWishlist(data.id);
@@ -87,8 +87,9 @@ export function useProductDetail() {
   const updateBackLink = () => {
     const backLink = document.getElementById('backLink');
     if (backLink) {
+      // Update the back link with sorting and filtering parameters
       const url = new URL(window.location.href);
-      url.hash = `/${localStorage.getItem('prePath')}?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+      url.hash = `#${localStorage.getItem('prePath')}/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
       backLink.href = url.toString();
     }
   };

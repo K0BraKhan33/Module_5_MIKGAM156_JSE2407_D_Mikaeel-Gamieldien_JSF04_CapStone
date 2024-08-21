@@ -41,7 +41,7 @@
                 <svg v-for="n in Math.floor(item.rating.rate)" :key="`filled-${n}`" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-6 sm:h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
                 </svg>
-                <svg v-for="n in Math.ceil(item.rating.rate - Math.floor(item.rating.rate))" :key="`half-${n}`" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-6 sm:h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                <svg v-if="item.rating.rate % 1 !== 0" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-6 sm:h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
                 </svg>
                 <svg v-for="n in 5 - Math.ceil(item.rating.rate)" :key="`empty-${n}`" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-6 sm:h-6" :class="emptyStarClass" fill="currentColor" viewBox="0 0 24 24">
@@ -59,55 +59,41 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import useProductList from './js/ProductList';
 
+const router = useRouter();
+const route = useRoute();
+const userId = ref('');
+const loggedIn = ref(false);
+const sortPrice = ref('');
+const sortType = ref('');
 const comparisonItems = ref([]);
+const { extractNumericId } = useProductList();
+
+const currentTheme = ref(localStorage.getItem('theme') || 'light');
 
 onMounted(() => {
-  const comparisonList = JSON.parse(localStorage.getItem('comparisonList') || '[]');
-  comparisonItems.value = comparisonList;
+  const userIdFromStorage = localStorage.getItem('userId');
+  const userIdFromUrl = route.query.userId || userIdFromStorage;
+
+  userId.value = extractNumericId(userIdFromUrl);
+  loggedIn.value = localStorage.getItem('loggedIn') === 'true';
+  sortPrice.value = route.query.sortPrice || '';
+  sortType.value = route.query.sortType || '';
+  comparisonItems.value = JSON.parse(localStorage.getItem('comparisonList') || '[]');
 });
 
-const currentTheme = ref(localStorage.getItem('theme'));
-
-const themeClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100';
-});
-
-const headerClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-gray-200 text-pink-300' : 'bg-gray-700 text-amber-600';
-});
-
-const headerLinkClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-white' : 'text-amber-400';
-});
-
-const headerTextClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
-});
-
-const emptyMessageClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-gray-800' : 'text-gray-200';
-});
-
-const tableClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-gray-200';
-});
-
-const headerCellClass = computed(() => {
-  return currentTheme.value === 'light' ? 'border border-gray-300 bg-amber-400 text-gray-900' : 'border border-gray-600 bg-amber-500 text-gray-200';
-});
-
-const rowClass = computed(() => {
-  return currentTheme.value === 'light' ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-800'; // Consistent color in dark mode
-});
-
-const cellClass = computed(() => {
-  return currentTheme.value === 'light' ? 'border border-gray-300' : 'border border-gray-600';
-});
-
-const emptyStarClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-gray-300' : 'text-gray-500';
-});
+const themeClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100');
+const headerClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-200 text-pink-300' : 'bg-gray-700 text-amber-600');
+const headerLinkClass = computed(() => currentTheme.value === 'light' ? 'text-white' : 'text-amber-400');
+const headerTextClass = computed(() => currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400');
+const emptyMessageClass = computed(() => currentTheme.value === 'light' ? 'text-gray-800' : 'text-gray-200');
+const tableClass = computed(() => currentTheme.value === 'light' ? 'bg-white text-gray-800' : 'bg-gray-800 text-gray-200');
+const headerCellClass = computed(() => currentTheme.value === 'light' ? 'border border-gray-300 bg-amber-400 text-gray-900' : 'border border-gray-600 bg-amber-500 text-gray-200');
+const rowClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-800');
+const cellClass = computed(() => currentTheme.value === 'light' ? 'border border-gray-300' : 'border border-gray-600');
+const emptyStarClass = computed(() => currentTheme.value === 'light' ? 'text-gray-300' : 'text-gray-500');
 
 const headers = ['Image', 'Title', 'Price', 'Category', 'Rating', 'Description'];
 </script>

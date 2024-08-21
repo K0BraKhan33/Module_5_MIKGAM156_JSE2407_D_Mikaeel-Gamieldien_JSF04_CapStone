@@ -4,7 +4,7 @@
     <div v-if="discountedProducts.length > 0" class="carousel flex overflow-x-auto space-x-4">
       <div v-for="product in discountedProducts" :key="product.id" class="carousel-item min-w-[250px] flex-shrink-0">
         <a
-          :href="`#/about?id=${product.id}`"
+          :href="`/#/about?id=${product.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`"
           class="block p-4 rounded-lg shadow-md"
           :class="classHover"
           @click="handleProductClick(product)"
@@ -25,18 +25,39 @@
     </div>
     <p v-else class="text-gray-500">No discounted products available.</p>
   </div>
-  
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { fetchDiscountedProducts, getDiscountedPriceFromLocalStorage, getDiscountPercentageFromLocalStorage } from './js/ProductDiscount.js';
+import { useRouter, useRoute } from 'vue-router';
+import useProductList from './js/ProductList.js';
 
 const discountedProducts = ref([]);
 const currentTheme = ref(localStorage.getItem('theme') || 'light');
+const router = useRouter();
+const route = useRoute();
+
+const userId = ref(0);
+const loggedIn = ref(false);
+const comparisonList = ref([]);
+const sortPrice = ref('');
+const sortType = ref('');
+
+const { extractNumericId } = useProductList();
 
 onMounted(async () => {
+  const userIdFromStorage = localStorage.getItem('userId');
+  const userIdFromUrl = route.query.userId || userIdFromStorage;
+
+  userId.value = extractNumericId(userIdFromUrl);
+  loggedIn.value = localStorage.getItem('loggedIn') === 'true';
+  comparisonList.value = JSON.parse(localStorage.getItem('comparisonList') || '[]');
+  sortPrice.value = route.query.sortPrice || '';
+  sortType.value = route.query.sortType || '';
+
   await fetchProductsAndUpdate();
+
   window.addEventListener('theme-changed', async () => {
     currentTheme.value = localStorage.getItem('theme');
     await fetchProductsAndUpdate();
@@ -66,7 +87,7 @@ const themeClass = computed(() => {
 
 const classHover = computed(() => {
   return currentTheme.value === 'light' ? 'hover:bg-amber-300 transition' : 'hover:bg-pink-600 transition';
-})
+});
 
 const headerTextClass = computed(() => {
   return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-300';
@@ -82,7 +103,12 @@ const priceTextClass = computed(() => {
 
 function handleProductClick(product) {
   console.log('Product clicked:', product);
+  // Implement click handling logic here if needed
 }
+watch(() => route.query, () => {
+  sortPrice.value = route.query.sortPrice || '';
+  sortType.value = route.query.sortType || '';
+  }, { immediate: true });
 </script>
 
 <style scoped>

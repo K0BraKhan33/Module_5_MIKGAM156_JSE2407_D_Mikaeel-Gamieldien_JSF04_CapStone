@@ -99,7 +99,7 @@ export default function useProductList() {
       alert("You must be logged in to access the Comparison Table.");
       return;
     } else {
-      router.push('/compare');
+      router.push(`/compare?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
     }
   }
 
@@ -195,6 +195,7 @@ export default function useProductList() {
     categories,
     addToCart,
     fetchProducts,
+    extractNumericId,
     userId,
     handleSortChange,
     isDefaultSort,
