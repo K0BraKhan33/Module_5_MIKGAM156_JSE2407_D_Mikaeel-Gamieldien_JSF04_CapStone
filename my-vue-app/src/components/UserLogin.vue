@@ -1,9 +1,14 @@
-<!--UserLogin.vue-->
 <template>
+  <!-- Main container for the login page -->
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <!-- Login form container with centered alignment -->
     <div class="w-full max-w-sm bg-white p-8 rounded-lg shadow-lg">
+      <!-- Login heading -->
       <h2 class="text-2xl font-bold mb-6">Login</h2>
+      
+      <!-- Login form with submit event handler -->
       <form @submit.prevent="handleLogin">
+        <!-- Username input field -->
         <div class="mb-4">
           <label for="username" class="block text-gray-700">Username</label>
           <input
@@ -14,6 +19,8 @@
             required
           />
         </div>
+
+        <!-- Password input field with visibility toggle -->
         <div class="mb-4">
           <label for="password" class="block text-gray-700">Password</label>
           <div class="relative">
@@ -29,17 +36,23 @@
               @click="togglePasswordVisibility"
               class="absolute inset-y-0 right-0 px-3 py-2 text-gray-600"
             >
+              <!-- Toggle button text based on password visibility -->
               {{ showPassword ? 'Hide' : 'Show' }}
             </button>
           </div>
         </div>
+
+        <!-- Submit button with loading state -->
         <button
           type="submit"
           class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg"
           :disabled="loading"
         >
+          <!-- Button text based on loading state -->
           {{ loading ? 'Logging in...' : 'Login' }}
         </button>
+
+        <!-- Display error message if login fails -->
         <p v-if="errorMessage" class="text-red-500 mt-4">{{ errorMessage }}</p>
       </form>
     </div>
@@ -50,6 +63,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+// Define reactive state variables
 const username = ref('');
 const password = ref('');
 const showPassword = ref(false);
@@ -57,16 +71,23 @@ const loading = ref(false);
 const errorMessage = ref('');
 const router = useRouter();
 
+/**
+ * Toggles the visibility of the password field.
+ */
 function togglePasswordVisibility() {
   showPassword.value = !showPassword.value;
 }
 
+/**
+ * Handles the login form submission.
+ * Sends login request, processes response, and manages navigation.
+ */
 async function handleLogin() {
-  loading.value = true;
-  errorMessage.value = '';
+  loading.value = true;  // Show loading indicator
+  errorMessage.value = '';  // Clear any previous error messages
 
   try {
-    // Perform the login using fetch
+    // Perform the login request
     const loginResponse = await fetch('https://fakestoreapi.com/auth/login', {
       method: 'POST',
       headers: {
@@ -78,6 +99,7 @@ async function handleLogin() {
       }),
     });
 
+    // Check if login was successful
     if (!loginResponse.ok) {
       throw new Error('Login failed');
     }
@@ -85,7 +107,7 @@ async function handleLogin() {
     const { token } = await loginResponse.json();
 
     if (token) {
-      // Fetch the user data
+      // Fetch user data using the provided token
       const usersResponse = await fetch('https://fakestoreapi.com/users', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -94,6 +116,7 @@ async function handleLogin() {
 
       const users = await usersResponse.json();
       const user = users.find(user => user.username === username.value);
+
       if (user) {
         const userId = `${user.id}`;
 
@@ -107,18 +130,18 @@ async function handleLogin() {
           const currentPath = window.location.hash.split('?')[0];
 
           if (prePath) {
-            return `/${prePath}`;  // Ensure prePath is returned correctly
+            return `/${prePath}`;  // Return the previous path if available
           } else {
-            return '/products';  // Default path
+            return '/products';  // Default path if no previous path
           }
         }
 
-        // Get sorting parameters
+        // Get sorting parameters from the URL
         const urlParams = new URLSearchParams(window.location.hash.split('?')[1]);
         const sortPrice = urlParams.get('sortPrice') || '';
         const sortType = urlParams.get('sortType') || '';
 
-        // Redirect to products page with sorting parameters
+        // Redirect to the appropriate page with sorting parameters
         router.push({
           path: getBackUrl(),
           query: {
@@ -127,16 +150,19 @@ async function handleLogin() {
           }
         });
       } else {
+        // Handle case where user is not found
         errorMessage.value = 'User not found';
       }
     } else {
+      // Handle case where token is not returned
       errorMessage.value = 'Invalid username or password';
     }
   } catch (error) {
+    // Handle and display any errors during login
     errorMessage.value = 'Login failed. Please try again.';
     console.error('Error during login:', error);
   } finally {
-    loading.value = false;
+    loading.value = false;  // Hide loading indicator
   }
 }
 </script>

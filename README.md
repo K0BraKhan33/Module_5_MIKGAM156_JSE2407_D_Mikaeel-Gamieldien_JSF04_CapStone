@@ -1,34 +1,14 @@
-# Module_4_MIKGAM156_JSE2407_D_Mikaeel-Gamieldien_JSF03
+# Module_5_MIKGAM156_JSE2407_D_Mikaeel-Gamieldien_JSF04_FinalProject
 # Vue Project
 
 ## Project Overview
 
-This Vue project is designed for a product listing and detail view application with sorting and filtering functionalities. The project also integrates Tailwind CSS for styling and uses Vue Router for routing between components.
+This is an extention of my module 4 Project, ive added a comparason table, cart, themechange and discounted produtcs. 
 
-## Folder Structure
+## Link to video
 
-The project directory structure is as follows:
+##Link to 
 
-/src
-/components
-Filters.vue
-ProductDetail.vue
-ProductList.vue
-SortControls.vue
-/assets
-/views
-App.vue
-main.js
-/public
-index.html
-.gitignore
-package.json
-README.md
-tailwind.config.js
-vite.config.js
-
-markdown
-Copy code
 
 ## Installation
 
@@ -37,8 +17,8 @@ To get started with this project, follow these steps:
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/yourusername/yourrepository.git
-    cd yourrepository
+    git clone https://github.com/K0BraKhan33/Module_5_MIKGAM156_JSE2407_D_Mikaeel-Gamieldien_JSF04_CapStone.git
+    cd my-vue-app
     ```
 
 2. **Install the dependencies:**
@@ -71,6 +51,14 @@ To get started with this project, follow these steps:
 ### Sorting and Filtering
 
 - The `SortControls.vue` component allows users to sort products by price or title and filter by category. It also includes a reset button to clear filters.
+
+### ProductDicount
+- The `ProductDicount.vue` component allows the user to preveiw 5 products that are dicounted, this is set for all that log in
+
+### comapason tabel
+- The `ProductCompare.vue` compnent allows the user to compare products with ease, allows them to add and remove products allowing the user to see all the products they want in one neat location
+### Theme
+-the theme component in each file allows the page to look sleak clean and able to change quickly, it auto seletcs the users input as default for the browser.
 
 ## API Integration
 
@@ -110,6 +98,7 @@ For development purposes, you can use the following commands:
 
 - **Run Development Server:** `npm run dev`
 - **Build for Production:** `npm run build`
+-**preview production build:** `npm run preview`
 - **Run Tests:** `npm test`
 
 ## License
@@ -118,4 +107,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contributing
 
-Contributions are welcome! Please follow the standard pull request workflow and ensure all tests pass before submitting.
+Please do not push to this file unless you have contributed to this project

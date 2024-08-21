@@ -1,15 +1,20 @@
 <template>
+  <!-- Main container with dynamic theme classes -->
   <div :class="themeClass">
     <!-- Header Section -->
     <header :class="[headerClass, 'p-4 flex items-center']">
+      <!-- Back link to navigate to the previous page -->
       <a id="backLink" :href="`#/`" :class="headerLinkClass" class="flex items-center space-x-2">
+        <!-- Back Arrow Icon -->
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
+        <!-- Site Title -->
         <span :class="headerTextClass">GoodMarting</span>
       </a>
     </header>
 
+    <!-- Main Content -->
     <main class="p-4">
       <!-- Loading Indicator -->
       <div v-if="loading" class="flex justify-center items-center h-full">
@@ -28,18 +33,23 @@
 
         <!-- Product Price -->
         <div>
+          <!-- Discounted Price -->
           <p v-if="product.discountedPrice" class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold mb-0">
             Price: ${{ product.discountedPrice }}
           </p>
+          <!-- Regular Price -->
           <p v-else class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2.5vw] font-semibold mb-0">
             Price: ${{ product.price || 'N/A' }}
           </p>
+          <!-- Original Price with Strikethrough if Discounted -->
           <p v-if="product.discountedPrice" class="text-gray-500 line-through text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
             Original: ${{ product.price || 'N/A' }}
           </p>
+          <!-- Discount Percentage -->
           <p v-if="product.discountPercentage" class="text-green-500 text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
             Discount: {{ product.discountPercentage }}%
           </p>
+          <!-- No Discount Message -->
           <p v-else class="text-green-500 text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
             No discount available
           </p>
@@ -62,17 +72,20 @@
           <div class="flex items-center">
             <span class="text-[4vw] lg:text-[3vw] md:text-[2vw] sm:text-[1.5vw]">Rating:</span>
             <div class="flex items-center">
+              <!-- Full Star Rating -->
               <template v-if="product.rating && product.rating.rate !== undefined">
                 <template v-for="_ in Math.floor(product.rating.rate)">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
                   </svg>
                 </template>
+                <!-- Partial Star Rating -->
                 <template v-for="_ in Math.ceil(product.rating.rate - Math.floor(product.rating.rate))">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
                   </svg>
                 </template>
+                <!-- Empty Stars -->
                 <template v-for="_ in 5 - Math.ceil(product.rating.rate)">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 17.27l6.18 3.85-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.35-1.64 7.03L12 17.27z"/>
@@ -81,6 +94,7 @@
               </template>
             </div>
           </div>
+          <!-- Review Count -->
           <span class="text-[4vw] lg:text-[3vw] md:text-[2vw] sm:text-[1.5vw]">
             {{ product.rating ? `(${product.rating.count} reviews)` : 'No reviews' }}
           </span>
@@ -106,19 +120,24 @@ export default {
       init 
     } = useProductDetail();
 
+    // Ref to store the URL of the previous page
     const previousUrl = ref('');
 
+    // Initialize component and set previous URL on mount
     onMounted(() => {
       init();
       previousUrl.value = document.referrer || '/';
     });
 
+    // Function to navigate back to the previous page
     const goBack = () => {
       window.location.href = previousUrl.value;
     };
 
+    // Ref to manage the current theme, default is dark
     const currentTheme = ref(localStorage.getItem('theme') || 'dark');
 
+    // Function to toggle between light and dark themes
     const swapTheme = () => {
       const newTheme = currentTheme.value === 'dark' ? 'light' : 'dark';
       currentTheme.value = newTheme;
@@ -126,21 +145,25 @@ export default {
       window.dispatchEvent(new Event('theme-changed'));
     };
 
+    // Computed class for theme-based styling
     const themeClass = computed(() => {
       return currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100';
     });
 
+    // Computed class for header styling based on theme
     const headerClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-[1.75vw] bg-gray-200 text-pink-600' : 'bg-gray-700 text-amber-400';
-});
+      return currentTheme.value === 'light' ? 'text-[1.75vw] bg-gray-200 text-pink-600' : 'bg-gray-700 text-amber-400';
+    });
 
-const headerLinkClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
-});
+    // Computed class for header link styling based on theme
+    const headerLinkClass = computed(() => {
+      return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
+    });
 
-const headerTextClass = computed(() => {
-  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
-});
+    // Computed class for header text styling based on theme
+    const headerTextClass = computed(() => {
+      return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
+    });
 
     const siteTitle = 'Your Site Title'; // Update with your actual site title
 
@@ -164,7 +187,7 @@ const headerTextClass = computed(() => {
 </script>
 
 <style scoped>
-/* Custom CSS for text truncation and scrollable boxes */
+/* Custom CSS for scrollable boxes */
 .scroll-box {
   overflow-y: auto;
 }

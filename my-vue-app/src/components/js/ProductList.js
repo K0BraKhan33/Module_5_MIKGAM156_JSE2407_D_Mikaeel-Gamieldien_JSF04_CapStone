@@ -1,26 +1,30 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 
+// Total number of products
 export const totalProducts = ref(0);
 
 export default function useProductList() {
-  const filteredItems = ref([]);
-  const isLoading = ref(true);
-  const sortPrice = ref('');
-  const sortType = ref('');
-  const categories = ref([]);
-  const isDefaultSort = ref(true);
-  const userId = ref(null);
-  const loggedIn = ref(false);
-  const comparisonList = ref([]);
-  const router = useRouter();
-  const originalList = ref([]);
-  const route = useRoute();
+  // Reactive references
+  const filteredItems = ref([]); // List of filtered products
+  const isLoading = ref(true); // Loading state
+  const sortPrice = ref(''); // Sorting criteria for price
+  const sortType = ref(''); // Sorting criteria for type/category
+  const categories = ref([]); // List of product categories
+  const isDefaultSort = ref(true); // Flag for default sorting
+  const userId = ref(null); // User ID
+  const loggedIn = ref(false); // Login state
+  const comparisonList = ref([]); // List of products to compare
+  const router = useRouter(); // Router instance for navigation
+  const originalList = ref([]); // Original list of products (before sorting/filtering)
+  const route = useRoute(); // Route instance to access URL parameters
 
+  // Show a notification message
   function showNotification(message) {
-    alert(message); // Simple example
+    alert(message); // Simple notification example
   }
 
+  // Fetch products from the API and initialize data
   async function fetchProducts() {
     try {
       const response = await fetch('https://fakestoreapi.com/products');
@@ -29,21 +33,24 @@ export default function useProductList() {
       filteredItems.value = data;
       originalList.value = [...data]; // Initialize originalList here
       totalProducts.value = filteredItems.value.length;
-      categories.value = [...new Set(data.map(item => item.category))];
+      categories.value = [...new Set(data.map(item => item.category))]; // Extract unique categories
       isLoading.value = false;
-      handleSortChange(); // Apply sorting and filtering based on initial URL
+      handleSortChange(); // Apply initial sorting and filtering
     } catch (error) {
       console.error('Error fetching products:', error);
     }
   }
 
+  // Handle sorting and filtering based on current criteria
   function handleSortChange() {
-    let sortedItems = [...originalList.value]; // Use the stored list for filtering and sorting
+    let sortedItems = [...originalList.value]; // Copy original list for sorting/filtering
 
+    // Filter by category if a category is selected
     if (sortType.value && sortType.value !== '') {
       sortedItems = sortedItems.filter(item => item.category === sortType.value);
     }
 
+    // Sort items based on the selected sorting criteria
     if (sortPrice.value) {
       sortedItems.sort((a, b) => {
         switch (sortPrice.value) {
@@ -62,9 +69,10 @@ export default function useProductList() {
     }
 
     filteredItems.value = sortedItems;
-    updateUrlParams(); // Update URL with current sorting and filtering parameters
+    updateUrlParams(); // Update URL parameters with current sorting/filtering criteria
   }
 
+  // Update URL parameters for sorting and filtering
   function updateUrlParams() {
     router.push({
       query: {
@@ -74,12 +82,14 @@ export default function useProductList() {
     });
   }
 
+  // Reset sorting and filtering to default values
   function resetFilters() {
     sortPrice.value = '';
     sortType.value = '';
     handleSortChange();
   }
 
+  // Add product to cart if the user is logged in
   function addToCart(productId) {
     const userId = localStorage.getItem("userId");
     if (!userId) {
@@ -90,9 +100,10 @@ export default function useProductList() {
     let cart = JSON.parse(localStorage.getItem(cartKey)) || [];
     cart.push(productId);
     localStorage.setItem(cartKey, JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent("cart-updated"));
+    window.dispatchEvent(new CustomEvent("cart-updated")); // Notify about cart update
   }
 
+  // Navigate to comparison page if the user is logged in
   function goToComparison() {
     const userId = localStorage.getItem("userId");
     if (!userId) {
@@ -103,6 +114,7 @@ export default function useProductList() {
     }
   }
 
+  // Handle authentication button click for login/logout
   function handleAuthButtonClick() {
     if (loggedIn.value) {
       localStorage.removeItem('userId');
@@ -116,6 +128,7 @@ export default function useProductList() {
     }
   }
 
+  // Redirect to cart page if the user is logged in
   function redirectToCart() {
     if (loggedIn.value) {
       localStorage.setItem('prePath', 'products');
@@ -125,6 +138,7 @@ export default function useProductList() {
     }
   }
 
+  // Redirect to wishlist page if the user is logged in
   function redirectToWishlist() {
     if (userId.value) {
       router.push(`/wishlist?userId=${userId.value}`);
@@ -133,6 +147,7 @@ export default function useProductList() {
     }
   }
 
+  // Toggle product in comparison list
   function toggleComparison(item) {
     let comparisonListArray = JSON.parse(localStorage.getItem('comparisonList') || '[]');
     const itemIndex = comparisonListArray.findIndex(i => i.id === item.id);
@@ -150,24 +165,29 @@ export default function useProductList() {
     comparisonList.value = comparisonListArray;
   }
 
+  // Check if a product is in the comparison list
   function isInComparison(itemId) {
     return comparisonList.value.some(item => item.id === itemId);
   }
 
+  // Update sorting criteria for price
   function updateSortPrice(newSortPrice) {
     sortPrice.value = newSortPrice;
     handleSortChange();
   }
 
+  // Update sorting criteria for type/category
   function updateSortType(newSortType) {
     sortType.value = newSortType;
     handleSortChange();
   }
 
+  // Extract numeric ID from a string
   function extractNumericId(id) {
     return parseInt(id, 10);
   }
 
+  // On component mount
   onMounted(() => {
     const userIdFromStorage = localStorage.getItem('userId');
     const userIdFromUrl = route.query.userId || userIdFromStorage;
