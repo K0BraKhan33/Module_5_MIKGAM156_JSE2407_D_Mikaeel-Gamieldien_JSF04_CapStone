@@ -8,9 +8,11 @@ This is an extention of my module 4 Project, ive added a comparason table, cart,
 ## Link to video
 
 ## Link to websight
+- you will need to login to a github account
 ```webview
 https://module-5-mikgam-156-jse-2407-d-mikaeel-gamieldien-7tnqxr6fg.vercel.app/
 ```
+
 
 
 ## Installation
