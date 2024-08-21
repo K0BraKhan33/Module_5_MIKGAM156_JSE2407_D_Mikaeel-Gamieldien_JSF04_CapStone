@@ -17,7 +17,7 @@
         <option v-for="category in categories" :key="category" :value="category">{{ category }}</option>
       </select>
     </div>
-    <button v-if="!isDefaultSort" @click="resetFilters" :class="resetButtonClass">
+    <button v-if="isDefaultSort" @click="resetFilters" :class="resetButtonClass">
       Reset Filters
     </button>
   </div>
@@ -77,10 +77,10 @@ export default {
   },
   computed: {
     themeClass() {
-      return this.currentTheme === 'light' ? 'bg-grey-800 text-gray-900' : 'bg-purple-700 text-gray-100';
+      return this.currentTheme === 'light' ? 'bg-grey-900 text-gray-900' : 'bg-grey-900 text-gray-900';
     },
     labelClass() {
-      return this.currentTheme === 'light' ? 'text-gray-700' : 'text-gray-300';
+      return this.currentTheme === 'light' ? 'text-pink-600' : 'text-amber-300';
     },
     selectClass() {
       return this.currentTheme === 'light'

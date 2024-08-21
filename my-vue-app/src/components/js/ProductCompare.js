@@ -1,6 +1,6 @@
 // ProductCompare.js
 
-const MAX_COMPARISON_ITEMS = 5;
+const MAX_COMPARISON_ITEMS = 10;
 
 export function addToComparison(item) {
   const comparisonItems = JSON.parse(localStorage.getItem('comparisonItems')) || [];

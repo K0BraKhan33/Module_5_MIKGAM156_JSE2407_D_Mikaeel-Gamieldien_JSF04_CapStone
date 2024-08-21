@@ -50,13 +50,18 @@
               </div>
             </td>
             <td :class="cellClass">{{ item.description }}</td>
+            <td :class="cellClass">
+              <!-- Remove Button -->
+              <button @click="removeItem(item.id)" :class="removeButtonClass">
+                Remove
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -82,18 +87,26 @@ onMounted(() => {
   sortPrice.value = route.query.sortPrice || '';
   sortType.value = route.query.sortType || '';
   comparisonItems.value = JSON.parse(localStorage.getItem('comparisonList') || '[]');
-  updateBackLink()
+  updateBackLink();
 });
 
 const updateBackLink = () => {
-    const backLink = document.getElementById('backLink');
-    if (backLink) {
-      // Update the back link with sorting and filtering parameters
-      const url = new URL(window.location.href);
-      url.hash = `#/products/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
-      backLink.href = url.toString();
-    }
-  };
+  const backLink = document.getElementById('backLink');
+  if (backLink) {
+    // Update the back link with sorting and filtering parameters
+    const url = new URL(window.location.href);
+    url.hash = `#/products/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+    backLink.href = url.toString();
+  }
+};
+
+const removeItem = (itemId) => {
+  // Remove item from the comparisonItems array
+  comparisonItems.value = comparisonItems.value.filter(item => item.id !== itemId);
+
+  // Update localStorage
+  localStorage.setItem('comparisonList', JSON.stringify(comparisonItems.value));
+};
 
 const themeClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100');
 const headerClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-200 text-pink-300' : 'bg-gray-700 text-amber-600');
@@ -105,10 +118,10 @@ const headerCellClass = computed(() => currentTheme.value === 'light' ? 'border 
 const rowClass = computed(() => currentTheme.value === 'light' ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-800');
 const cellClass = computed(() => currentTheme.value === 'light' ? 'border border-gray-300' : 'border border-gray-600');
 const emptyStarClass = computed(() => currentTheme.value === 'light' ? 'text-gray-300' : 'text-gray-500');
+const removeButtonClass = computed(() => currentTheme.value === 'light' ? 'bg-red-500 text-white px-2 py-1 rounded' : 'bg-red-700 text-gray-200 px-2 py-1 rounded');
 
-const headers = ['Image', 'Title', 'Price', 'Category', 'Rating', 'Description'];
+const headers = ['Image', 'Title', 'Price', 'Category', 'Rating', 'Description', 'Remove'];
 </script>
-
 <style scoped>
 table {
   border-collapse: collapse;
@@ -132,5 +145,18 @@ tr:nth-child(even) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.remove-button {
+  background-color: #f56565; /* Light red for light theme */
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+.remove-button.dark {
+  background-color: #c53030; /* Darker red for dark theme */
 }
 </style>
