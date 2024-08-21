@@ -1,14 +1,12 @@
 <template>
   <div :class="themeClass">
     <!-- Header Section -->
-    <header :class="['p-4 flex items-center', themeClass]">
-      <a id="backLink" :class="headerTextClass" :href="`#/`" >
-        <!-- Back Arrow Icon -->
+    <header :class="[headerClass, 'p-4 flex items-center']">
+      <a id="backLink" :href="`#/`" :class="headerLinkClass" class="flex items-center space-x-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
-        <!-- Site Title -->
-        <span>{{ siteTitle }}</span>
+        <span :class="headerTextClass">GoodMarting</span>
       </a>
     </header>
 
@@ -33,7 +31,7 @@
           <p v-if="product.discountedPrice" class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold mb-0">
             Price: ${{ product.discountedPrice }}
           </p>
-          <p v-else class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2vw] font-semibold mb-0">
+          <p v-else class="text-red-500 text-[5vw] sm:text-[4vw] md:text-[3vw] lg:text-[2.5vw] font-semibold mb-0">
             Price: ${{ product.price || 'N/A' }}
           </p>
           <p v-if="product.discountedPrice" class="text-gray-500 line-through text-[4vw] sm:text-[3vw] md:text-[2vw] lg:text-[1.5vw]">
@@ -98,23 +96,18 @@ import { useProductDetail } from './js/ProductDetail.js';
 
 export default {
   setup() {
-    const {     product,
-    isFavorited,
-    loading,
-    sortPrice,
-    sortType,
-    userId,
-    updateBackLink,
-    checkWishlist, // Ensure this method is exposed
-    fetchProductDetail: fetchProductData, // Ensure this method is exposed
-    init } = useProductDetail();
+    const { 
+      product,
+      isFavorited,
+      loading,
+      fetchProductDetail: fetchProductData, 
+      init 
+    } = useProductDetail();
 
     const previousUrl = ref('');
 
     onMounted(() => {
       init();
-
-      // Save the current URL with its query parameters
       previousUrl.value = document.referrer || '/';
     });
 
@@ -135,12 +128,28 @@ export default {
       return currentTheme.value === 'light' ? 'bg-gray-100 text-gray-900' : 'bg-gray-900 text-gray-100';
     });
 
+    const headerClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-[1.75vw] bg-gray-200 text-pink-600' : 'bg-gray-700 text-amber-400';
+});
+
+const headerLinkClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
+});
+
+const headerTextClass = computed(() => {
+  return currentTheme.value === 'light' ? 'text-pink-600' : 'text-amber-400';
+});
+
+    const siteTitle = 'Your Site Title'; // Update with your actual site title
+
     return {
       product,
       isFavorited,
       loading,
       swapTheme,
       themeClass,
+      headerTextClass,
+      siteTitle,
       goBack
     };
   }

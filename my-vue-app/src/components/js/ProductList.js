@@ -118,6 +118,7 @@ export default function useProductList() {
 
   function redirectToCart() {
     if (loggedIn.value) {
+      localStorage.setItem('prePath', 'products');
       router.push(`/cart?sortPrice=${sortPrice.value}&sortType=${sortType.value}`);
     } else {
       showNotification('You are not logged in. Please log in to access the cart.');

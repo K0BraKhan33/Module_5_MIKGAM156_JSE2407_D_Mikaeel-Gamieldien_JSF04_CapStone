@@ -1,12 +1,11 @@
-// UserCart.js
 import { ref, computed, onMounted } from 'vue';
 
 export default function useUserCart() {
     const cartItems = ref([]);
     const userId = localStorage.getItem("userId");
-    const sortPrice=ref([]);
-    const sortType=ref([]);
-
+    const sortPrice = ref('');
+    const sortType = ref('');
+    const prePath = ref('');
     const fetchProductDetails = async (productId) => {
         try {
             const response = await fetch(`https://fakestoreapi.com/products/${productId}`);
@@ -66,12 +65,26 @@ export default function useUserCart() {
         fetchCartItems();
     };
 
+    const init = () => {
+        const urlHash = window.location.hash;
+        const urlParams = new URLSearchParams(urlHash.replace('#', '').split('?')[1] || '');
+    
+        sortPrice.value = urlParams.get('sortPrice') || ''; 
+        sortType.value = urlParams.get('sortType') || ''; 
+        console.log(sortPrice.value, sortType.value);
+        updateBackLink()
+    };
+
     const updateBackLink = () => {
         const backLink = document.getElementById('backLink');
         if (backLink) {
-          // Update the back link with sorting and filtering parameters
+          // Build a new URL with updated hash and parameters
           const url = new URL(window.location.href);
-          url.hash = `#/products/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+          const newParams = new URLSearchParams();
+          if (sortPrice.value) newParams.append('sortPrice', sortPrice.value);
+          if (sortType.value) newParams.append('sortType', sortType.value);
+
+          url.hash = `${localStorage.getItem('prePath') || '/'}?${newParams.toString()}`;
           backLink.href = url.toString();
         }
       };
@@ -88,7 +101,11 @@ export default function useUserCart() {
 
     const itemCount = computed(() => cartItems.value.reduce((count, item) => count + item.quantity, 0));
 
-    onMounted(fetchCartItems);
+    onMounted(() => {
+        init();
+        fetchCartItems();
+        localStorage.setItem('prePath', 'products')
+    });
 
     return {
         cartItems,

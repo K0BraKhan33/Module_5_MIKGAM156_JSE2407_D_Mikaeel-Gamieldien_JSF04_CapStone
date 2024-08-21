@@ -89,7 +89,7 @@ export function useProductDetail() {
     if (backLink) {
       // Update the back link with sorting and filtering parameters
       const url = new URL(window.location.href);
-      url.hash = `#${localStorage.getItem('prePath')}/?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+      url.hash = `#${localStorage.getItem('prePath')}?sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
       backLink.href = url.toString();
     }
   };

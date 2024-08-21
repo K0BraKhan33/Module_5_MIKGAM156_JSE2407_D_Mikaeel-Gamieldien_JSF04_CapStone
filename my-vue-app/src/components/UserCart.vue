@@ -15,30 +15,26 @@
 
     <!-- Cart Items List -->
     <ul class="flex flex-wrap gap-4">
-
       <li v-for="item in cartItems" :key="item.id"
         :class="[itemClass, 'flex flex-col w-full md:w-1/2 lg:w-1/4 p-4 hover:shadow-lg transition-shadow']">
-        <a :href="`/#/about?id=${item.id}&sortPrice=${sortPrice}&sortType=${sortType}&userId=${userId}`"
-          class="block h-full">
+        <a 
+          @click.prevent="navigateToAbout(item.id)" 
+          href="#" 
+          class="block h-full"
+        >
           <div class="flex flex-col h-full">
             <img :src="item.image" :alt="item.title" class="w-full h-48 object-contain mb-4">
             <h2 :class="[itemTitleClass]">{{ item.title }}</h2>
             <p :class="[itemPriceClass]">{{ '$' + (item.price ? item.price.toFixed(2) : 'N/A') }}</p>
             <p :class="[itemQuantityClass]">Quantity: {{ item.quantity }}</p>
-
-
-
           </div>
         </a>
         <input type="number" min="1" :value="item.quantity" @input="updateQuantity(item.id, $event.target.value)"
           :class="[inputClass, 'focus:ring-2 focus:ring-amber-400 transition-ring']" />
-
         <button @click.prevent="removeFromCart(item.id)"
           :class="[removeButtonClass, 'hover:bg-red-600 transition-colors']">Remove</button>
       </li>
-
     </ul>
-
 
     <!-- Clear Cart Button -->
     <button @click.prevent="clearCart" :class="[clearButtonClass, 'hover:bg-gray-600 transition-colors']">Clear
@@ -57,16 +53,21 @@ import { ref, computed, onMounted } from 'vue';
 import useUserCart from './js/UserCart.js';
 
 const { cartItems, totalCost, itemCount, updateCartItem, removeCartItem, clearCart, updateBackLink } = useUserCart();
-updateBackLink() 
 
 const currentTheme = ref(localStorage.getItem('theme') || 'light');
 
-onMounted(() => { updateBackLink() })
+// Define sorting parameters (These should be dynamically updated by your sorting logic)
+const sortPrice = ref('priceDesc'); // Example: 'priceAsc', 'priceDesc'
+const sortType = ref("men's clothing"); // Example: 'category'
+
+onMounted(() => {
+  updateBackLink();
+});
+
 // Watch for theme change event
 window.addEventListener('theme-changed', () => {
   currentTheme.value = localStorage.getItem('theme') || 'light';
 });
-
 
 const updateQuantity = (productId, quantity) => {
   updateCartItem(productId, parseInt(quantity, 10));
@@ -74,6 +75,17 @@ const updateQuantity = (productId, quantity) => {
 
 const removeFromCart = (productId) => {
   removeCartItem(productId);
+};
+
+const navigateToAbout = (productId) => {
+  // Update prePath in local storage
+  localStorage.setItem('prePath', 'cart');
+  
+  // Construct the new URL with the required parameters
+  const newUrl = `/#/about?id=${productId}&sortPrice=${sortPrice.value}&sortType=${sortType.value}`;
+  
+  // Navigate to the new URL
+  window.location.href = newUrl;
 };
 
 const themeClass = computed(() => {
